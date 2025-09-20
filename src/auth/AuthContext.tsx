@@ -1,4 +1,3 @@
-
 import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import React, { createContext, useContext, useEffect, useState } from 'react';
@@ -12,7 +11,7 @@ interface AuthContextType {
   login: (email: string, pass: string) => Promise<void>;
   register: (name: string, email: string, pass: string) => Promise<void>;
   logout: () => Promise<void>;
-  updateUserCustomCategories: (userId: string, type: 'expense' | 'income', categories: string[]) => Promise<void>;
+  updateUserCustomCategories?: (userId: string, type: 'expense' | 'income', categories: string[]) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -34,18 +33,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               uid: firebaseUser.uid,
               email: firebaseUser.email,
               name: userDoc.data().name,
+              customCategories: userDoc.data().customCategories,
             });
           } else {
-            // If user doc doesn't exist, create it with basic info and then set user state
-            const newUserData: UserProfile = {
+            // Fallback if user doc doesn't exist (e.g., new user just signed up)
+            const newUser: UserProfile = {
               uid: firebaseUser.uid,
               email: firebaseUser.email,
               name: firebaseUser.email?.split('@')[0] || 'User',
-              // Initialize customCategories to an empty object if it's a new user
-              customCategories: { expense: [], income: [] }, 
+              customCategories: { expense: [], income: [] },
             };
-            await setDoc(userDocRef, newUserData, { merge: true }); // Use setDoc with merge: true
-            setUser(newUserData);
+            await setDoc(userDocRef, newUser, { merge: true });
+            setUser(newUser);
           }
         } else {
           setUser(null);
@@ -77,6 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await setDoc(doc(db, 'users', firebaseUser.uid), {
         name: name,
         email: email,
+        customCategories: { expense: [], income: [] },
       });
     } catch (error: any) {
       let errorMessage = 'An unexpected error occurred. Please try again.';
@@ -101,27 +101,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     type: 'expense' | 'income',
     categories: string[]
   ) => {
-    try {
-      const userDocRef = doc(db, 'users', userId);
-      await updateDoc(userDocRef, {
-        [`customCategories.${type}`]: categories,
-      });
-      // Optimistically update the local user state
-      setUser(prevUser => {
-        if (prevUser) {
-          const updatedCustomCategories = {
-            ...prevUser.customCategories,
-            [type]: categories,
-          };
-          return { ...prevUser, customCategories: updatedCustomCategories };
-        }
-        return prevUser;
-      });
-    } catch (error: any) {
-      console.error("Error updating custom categories:", error);
-      Alert.alert("Error", `Failed to update custom categories: ${error.message}`);
-      throw error;
-    }
+    const userDocRef = doc(db, 'users', userId);
+    await updateDoc(userDocRef, { [`customCategories.${type}`]: categories });
+    setUser(prev => prev ? { ...prev, customCategories: { ...(prev.customCategories || {}), [type]: categories } } : prev);
   };
 
   return (
