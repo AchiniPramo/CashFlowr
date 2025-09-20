@@ -1,4 +1,3 @@
-
 import { useAuth } from '@/src/auth/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';

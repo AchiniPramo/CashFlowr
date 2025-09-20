@@ -1,20 +1,28 @@
-
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity } from 'react-native';
-import { useAuth } from '../src/auth/AuthContext';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useAuth } from '../src/auth/AuthContext';
 
 const RegisterScreen = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const { register } = useAuth();
   const router = useRouter();
 
   const handleRegister = async () => {
     try {
+      if (!name.trim() || !email.trim() || !password) {
+        Alert.alert('Missing Information', 'Please fill all fields.');
+        return;
+      }
+      if (password !== confirmPassword) {
+        Alert.alert('Password Mismatch', 'Password and Confirm Password must match.');
+        return;
+      }
       await register(name, email, password);
-
       console.log('Registration successful!');
     } catch (error: any) {
       alert(`Registration failed: ${error.message}`);
@@ -22,88 +30,116 @@ const RegisterScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Create Account</Text>
-      <Text style={styles.subtitle}>Get started with your personal finance tracker.</Text>
-      
-      <TextInput
-        style={styles.input}
-        placeholder="Full Name"
-        value={name}
-        onChangeText={setName}
-        autoCapitalize="words"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Email address"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+    <LinearGradient colors={["#ecfdf5", "#d1fae5"]} start={{ x: 0, y: 0 }} end={{ x: 2, y: 2 }} style={styles.gradient}>
+      <View style={styles.decorTopRight} />
+      <View style={styles.decorBottomLeft} />
+      <View style={styles.container}>
+        <View style={styles.brandRow}>
+          <Image source={require('../assets/images/Cashlowr3.jpeg')} style={styles.logo} />
+          <Text style={styles.brand}>Cashflowr</Text>
+        </View>
 
-      <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
-        <Text style={styles.registerButtonText}>Register</Text>
-      </TouchableOpacity>
+        <Text style={styles.header}>Create Account</Text>
+        <Text style={styles.subtitle}>Get started with your personal finance tracker.</Text>
+        
+        <TextInput
+          style={styles.input}
+          placeholder="Full Name"
+          placeholderTextColor="#64748b"
+          value={name}
+          onChangeText={setName}
+          autoCapitalize="words"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Email address"
+          placeholderTextColor="#64748b"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          placeholderTextColor="#64748b"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Confirm Password"
+          placeholderTextColor="#64748b"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          secureTextEntry
+        />
 
-      <View style={styles.loginPromptContainer}>
-        <Text style={styles.loginPromptText}>Already have an account? </Text>
-        <TouchableOpacity onPress={() => router.push('/login')}>
-          <Text style={styles.loginLink}>Log in</Text>
+        <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
+          <Text style={styles.registerButtonText}>Register</Text>
         </TouchableOpacity>
+
+        <View style={styles.loginPromptContainer}>
+          <Text style={styles.loginPromptText}>Already have an account? </Text>
+          <TouchableOpacity onPress={() => router.push('/login')}>
+            <Text style={styles.loginLink}>Log in</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
+  gradient: { flex: 1 },
   container: {
     flex: 1,
     justifyContent: 'center',
     padding: 24,
-    backgroundColor: '#f8fafc',
   },
+  brandRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 20 },
+  logo: { width: 90, height: 90, borderRadius: 28, marginRight: 15 },
+  brand: { fontSize: 40, fontWeight: '900', color: '#ea580c' },
   header: {
-    fontSize: 32,
+    fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
-    color: '#047857', 
-    marginBottom: 8,
+    color: '#ea580c',
+    marginBottom: 10,
   },
   subtitle: {
     fontSize: 16,
     textAlign: 'center',
-    color: '#64748b', 
+    color: '#64748b',
     marginBottom: 32,
   },
   input: {
     height: 50,
-    borderColor: '#cbd5e1', 
+    borderColor: '#cbd5e1',
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 12,
     marginBottom: 16,
     paddingHorizontal: 16,
     backgroundColor: '#ffffff',
     fontSize: 16,
   },
   registerButton: {
-    backgroundColor: '#059669', 
-    paddingVertical: 14,
-    borderRadius: 8,
+    backgroundColor: '#ea580c',
+    paddingVertical: 16,
+    borderRadius: 12,
     alignItems: 'center',
     marginTop: 8,
+    shadowColor: '#ea580c',
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
   },
   registerButtonText: {
     color: '#ffffff',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   loginPromptContainer: {
     flexDirection: 'row',
@@ -112,12 +148,30 @@ const styles = StyleSheet.create({
   },
   loginPromptText: {
     fontSize: 14,
-    color: '#475569', 
+    color: '#475569',
   },
   loginLink: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#059669', 
+    fontWeight: '700',
+    color: '#ea580c',
+  },
+  decorTopRight: {
+    position: 'absolute',
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    backgroundColor: '#fed7aa',
+    right: -60,
+    top: -40,
+  },
+  decorBottomLeft: {
+    position: 'absolute',
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: '#fdba74',
+    left: -80,
+    bottom: -60,
   },
 });
 

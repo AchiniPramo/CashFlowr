@@ -1,4 +1,3 @@
-
 import { useTransactions } from '@/src/transactions/TransactionsContext';
 import React, { useMemo, useState } from 'react';
 import { Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';

@@ -1,44 +1,49 @@
-
 import { Slot, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
-import { GestureHandlerRootView } from 'react-native-gesture-handler'; // Import GestureHandlerRootView
+import { Text } from "react-native"; // Import Text for loading state
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AuthProvider, useAuth } from "../src/auth/AuthContext";
 import { TransactionsProvider } from "../src/transactions/TransactionsContext";
 
-const InitialLayout = () => {
-  const { user, loading } = useAuth(); // Get loading state
+const AuthRedirector = () => {
+  const { user } = useAuth();
   const segments = useSegments();
   const router = useRouter();
 
   useEffect(() => {
     const inTabsGroup = segments[0] === "(tabs)";
-    // Only redirect if not loading
-    if (!loading) {
-      if (user && !inTabsGroup) {
-        // User is logged in, but not in the tabs group -> go to tabs
-        router.replace("/(tabs)");
-      } else if (!user && inTabsGroup) {
-        // User is NOT logged in, but IS in the tabs group -> go to login
-        router.replace("/login");
-      } else if (!user && segments[0] !== 'login' && segments[0] !== 'register') {
-        // User is NOT logged in and not on login/register page -> go to login
-        router.replace("/login");
-      }
+    if (user && !inTabsGroup) {
+      router.replace("/(tabs)");
+    } else if (!user && inTabsGroup) {
+      router.replace("/login");
+    } else if (!user && segments[0] !== 'login' && segments[0] !== 'register') {
+      router.replace("/login");
     }
-  }, [user, loading, segments]); // Depend on loading as well
+  }, [user, segments]);
 
   return <Slot />;
 };
 
+const InitialLayout = () => {
+  const { loading } = useAuth(); // Get loading state
+
+  // Show a loading indicator until authentication state is resolved
+  if (loading) {
+    return <Text>Loading authentication...</Text>;
+  }
+
+  return <AuthRedirector />;
+};
+
 const RootLayout = () => {
   return (
-    <AuthProvider>
-      <TransactionsProvider>
-        <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AuthProvider>
+        <TransactionsProvider>
           <InitialLayout />
-        </GestureHandlerRootView>
-      </TransactionsProvider>
-    </AuthProvider>
+        </TransactionsProvider>
+      </AuthProvider>
+    </GestureHandlerRootView>
   );
 };
 
