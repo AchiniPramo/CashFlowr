@@ -1,4 +1,3 @@
-
 import { useAuth } from '@/src/auth/AuthContext';
 import { useTransactions } from '@/src/transactions/TransactionsContext';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,7 +5,7 @@ import { useRouter } from 'expo-router';
 import React, { useMemo } from 'react';
 import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { BarChart } from 'react-native-chart-kit';
-import SpendingAnalysis from '../../components/dashboard/SpendingAnalysis'; 
+import SpendingAnalysis from '../../components/dashboard/SpendingAnalysis';
 
 const { width } = Dimensions.get('window');
 
@@ -26,23 +25,36 @@ const DashboardScreen = () => {
     return { totalIncome: income, totalExpenses: expenses, balance: income - expenses };
   }, [transactions]);
 
+
   const recentTransactions = transactions.slice(0, 3);
 
   const chartData = useMemo(() => {
     const labels: string[] = [];
-    const data: number[] = [];
+    const incomeData: number[] = [];
+    const expenseData: number[] = [];
     const today = new Date();
     for (let i = 6; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(today.getDate() - i);
       const dateString = date.toISOString().split('T')[0];
-      labels.push(date.toLocaleDateString('en-US', { weekday: 'short' }));
-      const dailyTotal = transactions
+      labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+      const dailyIncome = transactions
+        .filter(t => t.date === dateString && t.type === 'income')
+        .reduce((sum, t) => sum + t.amount, 0);
+      incomeData.push(dailyIncome);
+      const dailyExpense = transactions
         .filter(t => t.date === dateString && t.type === 'expense')
         .reduce((sum, t) => sum + t.amount, 0);
-      data.push(dailyTotal);
+      expenseData.push(dailyExpense);
     }
-    return { labels, datasets: [{ data }] };
+    return {
+      labels,
+      datasets: [
+        { data: incomeData, color: (opacity = 1) => `rgba(34, 197, 94, ${opacity})` },
+        { data: expenseData, color: (opacity = 1) => `rgba(239, 68, 68, ${opacity})` },
+      ],
+      legend: ['Income', 'Expense'],
+    };
   }, [transactions]);
 
   if (loading) {
@@ -51,52 +63,60 @@ const DashboardScreen = () => {
 
   return (
     <ScrollView style={styles.container}>
-      {/* Removed local header, global header now handles app name and logout */}
-      <View style={styles.greetingContainer}>
-        <Text style={styles.greeting}>Hello, {user?.name || 'User'}!</Text>
-        <Text style={styles.subGreeting}>Welcome to your financial hub.</Text>
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.greeting}>Hello, {user?.name || 'User'}!</Text>
+          <Text style={styles.subGreeting}>Welcome to your financial hub.</Text>
+        </View>
       </View>
+
+      <SpendingAnalysis />
+
 
       <View style={styles.summaryContainer}>
         <View style={styles.summaryBox}>
           <Text style={styles.summaryLabel}>Balance</Text>
-          <Text style={styles.summaryValue}>${balance.toFixed(2)}</Text>
+          <Text style={styles.summaryValue}>LKR {balance.toFixed(2)}</Text>
         </View>
         <View style={styles.summaryBox}>
           <Text style={styles.summaryLabel}>Income</Text>
-          <Text style={[styles.summaryValue, { color: '#10b981' }]}>${totalIncome.toFixed(2)}</Text>
+          <Text style={[styles.summaryValue, { color: '#10b981' }]}>LKR {totalIncome.toFixed(2)}</Text>
         </View>
         <View style={styles.summaryBox}>
-          <Text style={styles.summaryLabel}>Expenses</Text>
-          <Text style={[styles.summaryValue, { color: '#ef4444' }]}>${totalExpenses.toFixed(2)}</Text>
+          <Text style={styles.summaryLabel}>Expense</Text>
+          <Text style={[styles.summaryValue, { color: '#ef4444' }]}>LKR {totalExpenses.toFixed(2)}</Text>
         </View>
       </View>
 
-      <TouchableOpacity style={styles.addButton} onPress={() => router.push('/transactions?openForm=true')}>
+      <TouchableOpacity style={styles.addButton} onPress={() => router.push('/transactions')}>
         <Ionicons name="add-circle" size={22} color="white" />
         <Text style={styles.addButtonText}>Add New Transaction</Text>
       </TouchableOpacity>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Recent Expenses</Text>
+        <Text style={styles.sectionTitle}>Income vs. Expense (Last 7 Days)</Text>
         <BarChart
           data={chartData}
           width={width - 32} // from react-native
           height={220}
-          yAxisLabel="$"
+          yAxisLabel="LKR "
+          yAxisSuffix=""
           chartConfig={{
             backgroundColor: '#ffffff',
             backgroundGradientFrom: '#ffffff',
             backgroundGradientTo: '#ffffff',
-            decimalPlaces: 2,
-            color: (opacity = 1) => `rgba(5, 150, 105, ${opacity})`,
+            decimalPlaces: 0,
+            barPercentage: 0.6,
+            color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
             labelColor: (opacity = 1) => `rgba(100, 116, 139, ${opacity})`,
+            propsForBackgroundLines: {
+              strokeDasharray: '0',
+              stroke: '#e2e8f0',
+            },
           }}
           style={{ marginVertical: 8, borderRadius: 16 }}
         />
       </View>
-
-      <SpendingAnalysis /> {/* Add SpendingAnalysis component here */}
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Recent Transactions</Text>
@@ -108,7 +128,7 @@ const DashboardScreen = () => {
                 <Text style={styles.transactionDate}>{t.date}</Text>
               </View>
               <Text style={[styles.transactionAmount, t.type === 'income' ? styles.income : styles.expense]}>
-                {t.type === 'income' ? '+' : '-'}$ {t.amount.toFixed(2)}
+                {t.type === 'income' ? '+' : '-'} LKR {t.amount.toFixed(2)}
               </Text>
             </View>
           ))
@@ -125,24 +145,20 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: 'white' },
   greeting: { fontSize: 24, fontWeight: 'bold', color: '#1e293b' },
   subGreeting: { fontSize: 16, color: '#64748b' },
-  summaryContainer: { flexDirection: 'row', justifyContent: 'space-around', padding: 16 },
+  summaryContainer: { flexDirection: 'row', justifyContent: 'space-around', padding: 16, backgroundColor: 'white', marginHorizontal: 16, marginVertical: 8, borderRadius: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2, elevation: 2 },
   summaryBox: { alignItems: 'center' },
   summaryLabel: { fontSize: 14, color: '#64748b' },
   summaryValue: { fontSize: 20, fontWeight: 'bold', color: '#1e293b' },
-  addButton: { flexDirection: 'row', backgroundColor: '#059669', padding: 14, borderRadius: 8, alignItems: 'center', justifyContent: 'center', marginHorizontal: 16, marginVertical: 8 },
+  addButton: { flexDirection: 'row', backgroundColor: '#ea580c', padding: 16, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginHorizontal: 16, marginVertical: 8, shadowColor: '#ea580c', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 3 },
   addButtonText: { color: 'white', fontSize: 16, fontWeight: '600', marginLeft: 8 },
-  section: { backgroundColor: 'white', padding: 16, marginVertical: 8 },
+  section: { backgroundColor: 'white', padding: 16, marginHorizontal: 16, marginVertical: 8, borderRadius: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2, elevation: 2 },
   sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 8, color: '#1e293b' },
-  transactionItem: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#e2e8f0' },
+  transactionItem: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 16, paddingHorizontal: 12, borderBottomWidth: 1, borderBottomColor: '#e2e8f0', backgroundColor: '#f8fafc', marginVertical: 2, borderRadius: 8 },
   transactionDesc: { fontSize: 16, color: '#334155' },
   transactionDate: { fontSize: 12, color: '#94a3b8' },
   transactionAmount: { fontSize: 16, fontWeight: 'bold' },
   income: { color: '#10b981' },
   expense: { color: '#ef4444' },
-  greetingContainer: { // New style for the greeting text container
-    padding: 16,
-    paddingTop: 0, // No top padding since global header is above
-  },
 });
 
 export default DashboardScreen;

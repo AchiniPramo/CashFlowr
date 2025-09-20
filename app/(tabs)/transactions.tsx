@@ -1,350 +1,149 @@
-
-import { useAuth } from '@/src/auth/AuthContext'; // Import useAuth
+import { useAuth } from '@/src/auth/AuthContext';
 import { useTransactions } from '@/src/transactions/TransactionsContext';
-import { Transaction } from '@/src/types';
 import { Ionicons } from '@expo/vector-icons';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { Picker } from '@react-native-picker/picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { TextInput } from 'react-native-gesture-handler';
-
-// Define a type for the data passed from the form
-interface TransactionFormData {
-  id?: string; // Optional for new transactions
-  description: string;
-  amount: number;
-  category: string;
-  type: 'expense' | 'income';
-  date: string;
-}
-
-// Table Header Component
-const TableHeader = ({ sortColumn, sortOrder, onSort }: {
-  sortColumn: keyof Transaction;
-  sortOrder: 'asc' | 'desc';
-  onSort: (column: keyof Transaction) => void;
-}) => (
-  <View style={styles.tableHeader}>
-    <TouchableOpacity onPress={() => onSort('description')} style={styles.headerColumn}>
-      <Text style={styles.headerText}>Description</Text>
-      {sortColumn === 'description' && (
-        <Ionicons name={sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'} size={14} color='#475569' style={styles.sortIcon} />
-      )}
-    </TouchableOpacity>
-    <TouchableOpacity onPress={() => onSort('amount')} style={styles.headerColumn}>
-      <Text style={styles.headerText}>Amount</Text>
-      {sortColumn === 'amount' && (
-        <Ionicons name={sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'} size={14} color='#475569' style={styles.sortIcon} />
-      )}
-    </TouchableOpacity>
-    <TouchableOpacity onPress={() => onSort('category')} style={[styles.headerColumn, { flex: 1.2 }]}>
-      <Text style={[styles.headerText, { textAlign: 'center' }]}>Category</Text>
-      {sortColumn === 'category' && (
-        <Ionicons name={sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'} size={14} color='#475569' style={styles.sortIcon} />
-      )}
-    </TouchableOpacity>
-    <TouchableOpacity onPress={() => onSort('date')} style={styles.headerColumn}>
-      <Text style={styles.headerText}>Date</Text>
-      {sortColumn === 'date' && (
-        <Ionicons name={sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'} size={14} color='#475569' style={styles.sortIcon} />
-      )}
-    </TouchableOpacity>
-    <Text style={[styles.headerText, { width: 100, textAlign: 'center' }]}>Actions</Text>
-  </View>
-);
+import { FlatList, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 // A more detailed transaction item
-const TransactionItem = ({ transaction, onDelete, onEdit }: {
-  transaction: Transaction;
+interface TransactionItemProps {
+  transaction: { id: string; description: string; amount: number; category: string; type: 'income' | 'expense'; date: string };
   onDelete: (id: string) => void;
-  onEdit: (transaction: Transaction) => void;
-}) => (
-  <View style={styles.transactionRow}>
-    <Text style={styles.rowText}>{transaction.description}</Text>
-    <Text style={[styles.rowText, transaction.type === 'income' ? styles.income : styles.expense]}>
-      {transaction.type === 'income' ? '+' : '-'}$ {transaction.amount.toFixed(2)}
-    </Text>
-    <View style={styles.categoryBadgeContainer}>
-      <Text style={styles.categoryBadge}>{transaction.category}</Text>
+  onEdit: (t: TransactionItemProps['transaction']) => void;
+}
+const TransactionItem = ({ transaction, onDelete, onEdit }: TransactionItemProps) => (
+  <View style={styles.transactionItem}>
+    <View style={styles.transactionDetails}>
+      <Text style={styles.transactionDesc}>{transaction.description}</Text>
+      <Text style={styles.transactionSub}>{transaction.category} | {transaction.date}</Text>
     </View>
-    <Text style={styles.rowText}>{transaction.date}</Text>
+    <Text style={[styles.transactionAmount, transaction.type === 'income' ? styles.income : styles.expense]}>
+      {transaction.type === 'income' ? '+' : '-'} {transaction.amount.toFixed(2)} LKR
+    </Text>
     <View style={styles.transactionActions}>
         <TouchableOpacity onPress={() => onEdit(transaction)} style={styles.actionButton}>
-            <Ionicons name='pencil-outline' size={20} color='#2563eb' />
+            <Ionicons name="pencil-outline" size={20} color="#2563eb" />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => onDelete(transaction.id)} style={styles.actionButton}>
-            <Ionicons name='trash-outline' size={20} color='#ef4444' />
+            <Ionicons name="trash-outline" size={20} color="#ef4444" />
         </TouchableOpacity>
     </View>
   </View>
 );
 
-// Transaction Form Component
-const TransactionForm = ({ initialTransaction, onSave, onCancel }: {
-  initialTransaction?: Transaction | null;
-  onSave: (transaction: TransactionFormData) => void;
-  onCancel: () => void;
-}) => {
-  const [description, setDescription] = useState(initialTransaction?.description || '');
-  const [amount, setAmount] = useState(initialTransaction?.amount.toString() || '');
-  const [category, setCategory] = useState(initialTransaction?.category || 'Food');
-  const [type, setType] = useState<'expense' | 'income'>(initialTransaction?.type || 'expense');
-  const [date, setDate] = useState(initialTransaction?.date || new Date().toISOString().split('T')[0]);
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [customCategoryText, setCustomCategoryText] = useState(''); // State for custom category input
-  const [showCustomCategoryInput, setShowCustomCategoryInput] = useState(false); // State to show/hide custom category input
-  const [showAllCategories, setShowAllCategories] = useState(false); // State to show all categories
+export default function TransactionsScreen() {
+  const { transactions, loading, deleteTransaction, addTransaction } = useTransactions();
+  const { user, updateUserCustomCategories } = useAuth();
+  const [filter, setFilter] = useState('all'); // 'all', 'income', 'expense'
+  const router = useRouter();
+  const params = useLocalSearchParams();
+  const [showAddPrompt, setShowAddPrompt] = useState(false);
 
-  const { user, updateUserCustomCategories } = useAuth(); // Use AuthContext to get user and update custom categories
-  const userId = user?.uid;
+  // Inline form state
+  const defaultCategories = {
+    income: ['Salary', 'Freelance', 'Gift', 'Other'],
+    expense: ['Food', 'Transport', 'Shopping', 'Bills', 'Entertainment', 'Other'],
+  } as const;
+  const [type, setType] = useState<'income' | 'expense' | ''>('');
+  const [category, setCategory] = useState<string>('');
+  const [customCategory, setCustomCategory] = useState<string>('');
+  const [description, setDescription] = useState<string>('');
+  const [amount, setAmount] = useState<string>('');
+  const [date, setDate] = useState<string>('');
+  const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
+  const [dateObj, setDateObj] = useState<Date>(new Date());
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
-  const defaultExpenseCategories = useMemo(() => [
-    'Food', 'Transport', 'Shopping', 'Bills', 'Entertainment',
-  ], []);
+  const userCustomCategories = useMemo(() => {
+    return user?.customCategories || { expense: [], income: [] };
+  }, [user]);
 
-  const defaultIncomeCategories = useMemo(() => [
-    'Salary', 'Freelance', 'Gift', 'Investment',
-  ], []);
-
-  const allCombinedCategories = useMemo(() => {
-    const userCustomExpense = user?.customCategories?.expense || [];
-    const userCustomIncome = user?.customCategories?.income || [];
-
-    const combinedExpense = [...new Set([...defaultExpenseCategories, ...userCustomExpense])];
-    const combinedIncome = [...new Set([...defaultIncomeCategories, ...userCustomIncome])];
-
-    return {
-      expense: combinedExpense,
-      income: combinedIncome,
-    };
-  }, [user, defaultExpenseCategories, defaultIncomeCategories]);
-
-  const displayCategories = useMemo(() => {
-    let categoriesForType = type === 'income' ? allCombinedCategories.income : allCombinedCategories.expense;
-
-    // Sort by most recent usage (dummy for now, actual implementation needs usage tracking)
-    categoriesForType.sort((a, b) => a.localeCompare(b)); 
-
-    if (!showAllCategories && categoriesForType.length > 9) { // 9 + 'Custom' + 'See All' = 11 visible
-      return [...categoriesForType.slice(0, 9), 'See All', 'Custom'];
-    }
-    return [...categoriesForType, 'Custom'];
-  }, [type, allCombinedCategories, showAllCategories]);
+  const combinedCategories = useMemo(() => {
+    if (!type) return [] as string[];
+    const base = type === 'income' ? defaultCategories.income : defaultCategories.expense;
+    const customs = (userCustomCategories[type] || []) as string[];
+    const merged = Array.from(new Set([...base, ...customs]));
+    return [...merged, 'Custom'];
+  }, [type, userCustomCategories]);
 
   useEffect(() => {
-    // When editing, ensure the initialTransaction category is set correctly.
-    if (initialTransaction && initialTransaction.category) {
-      setCategory(initialTransaction.category);
-      if (initialTransaction.category === 'Custom') {
-        setCustomCategoryText(initialTransaction.category);
-        setShowCustomCategoryInput(true);
-      } else if (!allCombinedCategories.expense.includes(initialTransaction.category) && !allCombinedCategories.income.includes(initialTransaction.category)) {
-        // If it's an old custom category not in the current combined list
-        setCustomCategoryText(initialTransaction.category);
-        setCategory('Custom');
-        setShowCustomCategoryInput(true);
-      }
-    } else if (!displayCategories.includes(category) || (category === 'Custom' && !customCategoryText)) {
-      // If selected category is no longer valid or Custom is empty, reset to a default.
-      setCategory(type === 'expense' ? defaultExpenseCategories[0] || '' : defaultIncomeCategories[0] || '');
+    if (params?.openForm === 'true') {
+      setShowAddPrompt(true);
     }
-  }, [type, displayCategories, initialTransaction, allCombinedCategories]);
+  }, [params]);
 
+  // Default date to today on mount
   useEffect(() => {
-    setShowCustomCategoryInput(category === 'Custom');
-    if (category !== 'Custom') {
-      setCustomCategoryText('');
-    }
-  }, [category]);
+    const today = new Date();
+    setDate(today.toISOString().split('T')[0]);
+    setDateObj(today);
+  }, []);
 
-  const handleSave = async () => {
-    let categoryToProcess = category;
-    if (category === 'Custom') {
-      if (!customCategoryText) {
-        Alert.alert('Missing Information', 'Please enter a custom category.');
-        return;
-      }
-      categoryToProcess = customCategoryText.trim();
-      if (!categoryToProcess) {
-        Alert.alert('Invalid Category', 'Custom category cannot be empty.');
-        return;
-      }
-    }
-
-    // Logic to update user's custom categories in Firestore based on usage
-    if (userId && user && updateUserCustomCategories) {
-      const currentCustomCategories = user.customCategories?.[type] || [];
-      let updatedCustomCategories = [...currentCustomCategories];
-      
-      // Remove if already exists to re-add at front for recency
-      updatedCustomCategories = updatedCustomCategories.filter(cat => cat !== categoryToProcess);
-      // Add new or recently used custom category to the front
-      updatedCustomCategories = [categoryToProcess, ...updatedCustomCategories];
-
-      await updateUserCustomCategories(userId, type, updatedCustomCategories);
-    }
-
-    if (!description || !amount || !date || !categoryToProcess) {
-      Alert.alert('Missing Information', 'Please fill out all fields.');
-      return;
-    }
-
-    const numericAmount = parseFloat(amount);
-    if (isNaN(numericAmount) || numericAmount <= 0) {
-      Alert.alert('Invalid Amount', 'Please enter a valid, positive number for the amount.');
-      return;
-    }
-
-    onSave({ id: initialTransaction?.id, description, amount: numericAmount, category: categoryToProcess, type, date });
-
-    // Reset form fields
+  const resetForm = () => {
+    setType('');
+    setCategory('');
+    setCustomCategory('');
     setDescription('');
     setAmount('');
-    setCategory(type === 'expense' ? defaultExpenseCategories[0] || '' : defaultIncomeCategories[0] || ''); // Reset to default based on type
-    setType(type === 'expense' ? 'expense' : 'income'); // Keep type consistent on reset
-    setDate(new Date().toISOString().split('T')[0]);
-    setCustomCategoryText('');
-    setShowCustomCategoryInput(false);
-    setShowAllCategories(false); // Reset 'See All' view
+    setDate('');
+    setIsEditing(false);
+    setEditingId(null);
   };
 
-  const onChangeDate = (event: any, selectedDate?: Date) => {
-    setShowDatePicker(false);
-    const currentDate = selectedDate || new Date(date);
-    setDate(currentDate.toISOString().split('T')[0]);
-  };
-
-  return (
-    <View style={formStyles.container}>
-      <Text style={formStyles.title}>{initialTransaction ? 'Edit Transaction' : 'Add New Transaction'}</Text>
-
-      <TextInput
-        style={formStyles.input}
-        placeholder='Description'
-        value={description}
-        onChangeText={setDescription}
-      />
-      <TextInput
-        style={formStyles.input}
-        placeholder='Amount'
-        value={amount}
-        onChangeText={setAmount}
-        keyboardType='numeric'
-      />
-      
-      <Text style={formStyles.label}>Date</Text>
-      <TouchableOpacity onPress={() => setShowDatePicker(true)} style={formStyles.datePickerButton}>
-        <Text style={formStyles.datePickerButtonText}>{date}</Text>
-      </TouchableOpacity>
-      {showDatePicker && (
-        <DateTimePicker
-          testID='dateTimePicker'
-          value={new Date(date)}
-          mode='date'
-          display='default'
-          onChange={onChangeDate}
-        />
-      )}
-
-      <Text style={formStyles.label}>Type</Text>
-      <Picker
-        selectedValue={type}
-        onValueChange={(itemValue) => setType(itemValue as 'expense' | 'income')}
-        style={formStyles.picker}
-      >
-        <Picker.Item label="Expense" value="expense" />
-        <Picker.Item label="Income" value="income" />
-      </Picker>
-
-      <Text style={formStyles.label}>Category</Text>
-      <Picker
-        selectedValue={category}
-        onValueChange={(itemValue) => {
-          if (itemValue === 'See All') {
-            setShowAllCategories(true);
-          } else {
-            setCategory(itemValue);
-          }
-        }}
-        style={formStyles.picker}
-      >
-        {displayCategories.map(cat => (
-          <Picker.Item key={cat} label={cat} value={cat} />
-        ))}
-      </Picker>
-
-      {showCustomCategoryInput && (
-        <TextInput
-          style={formStyles.input}
-          placeholder='Enter Custom Category'
-          value={customCategoryText}
-          onChangeText={setCustomCategoryText}
-        />
-      )}
-
-      <TouchableOpacity style={formStyles.addButton} onPress={handleSave}>
-        <Text style={formStyles.addButtonText}>{initialTransaction ? 'Update Transaction' : 'Add Transaction'}</Text>
-      </TouchableOpacity>
-
-      {initialTransaction && (
-        <TouchableOpacity style={[formStyles.addButton, formStyles.cancelButton]} onPress={onCancel}>
-          <Text style={formStyles.addButtonText}>Cancel Edit</Text>
-        </TouchableOpacity>
-      )}
-    </View>
-  );
-};
-
-export default function TransactionsScreen() {
-  const { transactions, loading, addTransaction, updateTransaction, deleteTransaction } = useTransactions();
-  const [filter, setFilter] = useState('all');
-  const [showForm, setShowForm] = useState(false);
-  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
-  const router = useRouter();
-  const { openForm } = useLocalSearchParams();
-
-  useEffect(() => {
-    if (openForm === 'true') {
-      setShowForm(true);
+  const handleAddCustomCategory = async () => {
+    if (!type) return;
+    const trimmed = customCategory.trim();
+    if (!trimmed) return;
+    const existing = new Set([...(userCustomCategories[type] || [])]);
+    if (!existing.has(trimmed)) {
+      const updated = [...existing, trimmed];
+      if (user && updateUserCustomCategories) {
+        await updateUserCustomCategories(user.uid, type, updated as string[]);
+      }
     }
-  }, [openForm]);
+    setCategory(trimmed);
+    setCustomCategory('');
+  };
+
+  const onSubmitForm = async () => {
+    if (!type || !description.trim() || !amount || !date) return;
+    const parsedAmount = parseFloat(amount);
+    if (Number.isNaN(parsedAmount)) return;
+    const finalCategory = category === 'Custom' ? customCategory.trim() : category;
+    if (!finalCategory) return;
+
+    if (isEditing && editingId) {
+      // Editing flow could be added if update screen is desired here
+      // For now, navigate to edit screen for consistency
+      router.push(`/edit-transaction?id=${editingId}`);
+      return;
+    }
+
+    await addTransaction({
+      description: description.trim(),
+      amount: parsedAmount,
+      category: finalCategory,
+      type: type,
+      date,
+    });
+    resetForm();
+  };
 
   const filteredTransactions = useMemo(() => {
     if (filter === 'all') return transactions;
     return transactions.filter(t => t.type === filter);
   }, [transactions, filter]);
   
-  const onEdit = (transaction: Transaction) => {
-    setEditingTransaction(transaction);
-    setShowForm(true);
+  const onEdit = (transaction: { id: string }) => {
+    // Navigate to an edit screen, passing the transaction ID
+    router.push(`/edit-transaction?id=${transaction.id}`);
   };
 
   const onDelete = (id: string) => {
+    // Confirmation before deleting
     deleteTransaction(id);
-  };
-
-  const handleSave = async (transactionData: TransactionFormData) => {
-    try {
-      if (transactionData.id) {
-        await updateTransaction(transactionData.id, transactionData);
-        Alert.alert('Success', 'Transaction updated successfully!');
-      } else {
-        const { id, ...newTransactionData } = transactionData;
-        await addTransaction(newTransactionData);
-        Alert.alert('Success', 'Transaction added successfully!');
-      }
-      setShowForm(false);
-      setEditingTransaction(null);
-    } catch (error: any) {
-      Alert.alert('Error', `Failed to save transaction: ${error.message}`);
-    }
-  };
-
-  const handleCancelEdit = () => {
-    setShowForm(false);
-    setEditingTransaction(null);
   };
 
   if (loading) {
@@ -353,6 +152,133 @@ export default function TransactionsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Inline Add/Edit Form */}
+      <View style={styles.formCard}>
+        <Text style={styles.formTitle}>{isEditing ? 'Edit Transaction' : 'Add New Transaction'}</Text>
+
+        <View style={styles.formRow}>
+          <Text style={styles.label}>Type</Text>
+          <View style={styles.chipsRow}>
+            <TouchableOpacity onPress={() => { setType('income'); setCategory(''); }} style={[styles.chip, type === 'income' && styles.chipActive]}>
+              <Text style={[styles.chipText, type === 'income' && styles.chipTextActive]}>Income</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => { setType('expense'); setCategory(''); }} style={[styles.chip, type === 'expense' && styles.chipActive]}>
+              <Text style={[styles.chipText, type === 'expense' && styles.chipTextActive]}>Expense</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {!!type && (
+          <View style={styles.formRow}>
+            <Text style={styles.label}>Category</Text>
+            <View style={styles.categoriesWrap}>
+              {combinedCategories.map((c) => (
+                <TouchableOpacity key={c} onPress={() => setCategory(c)} style={[styles.categoryPill, category === c && styles.categoryPillActive]}>
+                  <Text style={[styles.categoryPillText, category === c && styles.categoryPillTextActive]}>{c}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {category === 'Custom' && (
+          <View style={styles.formRow}>
+            <Text style={styles.label}>Add Custom Category</Text>
+            <View style={styles.customRow}>
+              <TextInput
+                style={styles.customInputBox}
+                placeholder="Enter new category"
+                placeholderTextColor="#94a3b8"
+                value={customCategory}
+                onChangeText={setCustomCategory}
+                returnKeyType="done"
+              />
+              <TouchableOpacity onPress={handleAddCustomCategory} style={styles.addCatButton}>
+                <Text style={styles.addCatButtonText}>Add</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
+        <View style={styles.formRow}>
+          <Text style={styles.label}>Description</Text>
+          <TextInput
+            style={styles.textInputBox}
+            placeholder="Description"
+            placeholderTextColor="#94a3b8"
+            value={description}
+            onChangeText={setDescription}
+            returnKeyType="next"
+          />
+        </View>
+
+        <View style={styles.formRowInline}>
+          <View style={{ flex: 1, marginRight: 8 }}>
+            <Text style={styles.label}>Amount (LKR)</Text>
+            <TextInput
+              style={styles.textInputBox}
+              placeholder="0.00"
+              placeholderTextColor="#94a3b8"
+              value={amount}
+              onChangeText={setAmount}
+              keyboardType="decimal-pad"
+              returnKeyType="next"
+            />
+          </View>
+          <View style={{ flex: 1, marginLeft: 8 }}>
+            <Text style={styles.label}>Date</Text>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={styles.textInputBox}
+              onPress={() => setShowDatePicker(true)}
+            >
+              <Text style={{ color: date ? '#0f172a' : '#94a3b8' }}>{date || 'YYYY-MM-DD'}</Text>
+            </TouchableOpacity>
+            {showDatePicker && (
+              <DateTimePicker
+                value={dateObj}
+                mode="date"
+                display="default"
+                onChange={(event: unknown, selectedDate?: Date) => {
+                  setShowDatePicker(false);
+                  if (selectedDate) {
+                    setDateObj(selectedDate);
+                    const iso = selectedDate.toISOString().split('T')[0];
+                    setDate(iso);
+                  }
+                }}
+              />)
+            }
+          </View>
+        </View>
+
+        <View style={styles.actionsRow}>
+          <TouchableOpacity onPress={onSubmitForm} style={[styles.primaryButton]}>
+            <Text style={styles.primaryButtonText}>{isEditing ? 'Update Transaction' : 'Add Transaction'}</Text>
+          </TouchableOpacity>
+          {isEditing && (
+            <TouchableOpacity onPress={resetForm} style={[styles.secondaryButton]}>
+              <Text style={styles.secondaryButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+      {showAddPrompt && (
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Add New Transaction</Text>
+            <Text style={styles.modalText}>Would you like to add a new transaction now?</Text>
+            <View style={styles.modalActions}>
+              <TouchableOpacity onPress={() => { setShowAddPrompt(false); router.push('/add-transaction'); }} style={[styles.modalButton, styles.modalPrimary]}>
+                <Text style={styles.modalPrimaryText}>Open Form</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setShowAddPrompt(false)} style={[styles.modalButton, styles.modalSecondary]}>
+                <Text style={styles.modalSecondaryText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
       <Text style={styles.title}>All Transactions</Text>
       
       <View style={styles.filterContainer}>
@@ -376,210 +302,70 @@ export default function TransactionsScreen() {
         </TouchableOpacity>
       </View>
 
-      {showForm && (
-        <TransactionForm 
-          initialTransaction={editingTransaction}
-          onSave={handleSave}
-          onCancel={handleCancelEdit}
-        />
-      )}
-
-      <View style={styles.listWrapper}> 
-      <View style={styles.tableContainer}>
-        <TableHeader sortColumn={'date'} sortOrder={'desc'} onSort={() => {}} />
-        <FlatList
-          data={filteredTransactions}
-          renderItem={({ item }) => <TransactionItem transaction={item} onDelete={onDelete} onEdit={onEdit} />}
-          keyExtractor={(item) => item.id}
-          ListEmptyComponent={<Text style={styles.emptyText}>No transactions found.</Text>}
-        />
-      </View>
-      </View>
-
-      {!showForm && (
-        <TouchableOpacity style={styles.fab} onPress={() => setShowForm(true)}>
-          <Ionicons name='add' size={30} color='white' />
-        </TouchableOpacity>
-      )}
+      <FlatList
+        data={filteredTransactions}
+        renderItem={({ item }) => <TransactionItem transaction={item} onDelete={onDelete} onEdit={onEdit} />}
+        keyExtractor={(item) => item.id}
+        ListEmptyComponent={<Text style={styles.emptyText}>No transactions found.</Text>}
+      />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f1f5f9', padding: 16 },
-  title: { fontSize: 24, fontWeight: 'bold', color: '#1e293b', marginBottom: 16 },
+  container: { flex: 1, backgroundColor: '#f8fafc', padding: 16 },
+  title: { fontSize: 28, fontWeight: '800', color: '#0f172a', marginBottom: 20, letterSpacing: -0.5 },
   filterContainer: { flexDirection: 'row', marginBottom: 16, justifyContent: 'center' },
-  filterButton: { paddingVertical: 8, paddingHorizontal: 16, borderRadius: 20, backgroundColor: '#e2e8f0', marginHorizontal: 4 },
-  activeFilter: { backgroundColor: '#059669' },
-  filterText: { color: '#475569', fontWeight: '600' },
+  filterButton: { paddingVertical: 12, paddingHorizontal: 20, borderRadius: 25, backgroundColor: '#f1f5f9', marginHorizontal: 6, minWidth: 80 },
+  activeFilter: { backgroundColor: '#ea580c' },
+  filterText: { color: '#475569', fontWeight: '600', fontSize: 14 },
   activeFilterText: { color: 'white' },
-  
-  listWrapper: {
-    flex: 1,
-    marginTop: 16, // Add some spacing
-  },
-  tableContainer: {
-    backgroundColor: 'white',
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 3,
-  },
-  tableHeader: {
-    flexDirection: 'row',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: '#f8fafc',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
-  },
-  headerColumn: { 
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  headerText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#475569',
-    textAlign: 'left',
-  },
-  sortIcon: {
-    marginLeft: 4,
-  },
-  transactionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
-  },
-  rowText: {
-    fontSize: 14,
-    color: '#334155',
-    flex: 1,
-  },
-  categoryBadgeContainer: {
-    backgroundColor: '#e0f2fe',
-    borderRadius: 12,
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    marginRight: 8,
-  },
-  categoryBadge: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#1e40af',
-  },
-  transactionActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  actionButton: {
-    padding: 8,
-  },
-  income: {
-    color: '#10b981',
-  },
-  expense: {
-    color: '#ef4444',
-  },
+  transactionItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'white', padding: 16, borderRadius: 12, marginBottom: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2, elevation: 2 },
+  transactionDetails: { flex: 1 },
+  transactionDesc: { fontSize: 16, fontWeight: '600', color: '#334155' },
+  transactionSub: { fontSize: 12, color: '#64748b', marginTop: 2 },
+  transactionAmount: { fontSize: 16, fontWeight: '700', marginHorizontal: 8 },
+  income: { color: '#10b981' },
+  expense: { color: '#ef4444' },
+  transactionActions: { flexDirection: 'row' },
+  actionButton: { padding: 8 },
   emptyText: { textAlign: 'center', marginTop: 20, color: '#64748b' },
-  fab: {
-    position: 'absolute',
-    width: 56,
-    height: 56,
-    alignItems: 'center',
-    justifyContent: 'center',
-    right: 20,
-    bottom: 20,
-    backgroundColor: '#059669',
-    borderRadius: 28,
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-  },
+  formCard: { backgroundColor: 'white', padding: 20, borderRadius: 16, marginBottom: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },
+  formTitle: { fontSize: 20, fontWeight: '800', color: '#0f172a', marginBottom: 16, letterSpacing: -0.3 },
+  formRow: { marginBottom: 12 },
+  formRowInline: { flexDirection: 'row', marginBottom: 12 },
+  label: { fontSize: 14, color: '#64748b', marginBottom: 8, fontWeight: '600' },
+  chipsRow: { flexDirection: 'row' },
+  chip: { paddingVertical: 8, paddingHorizontal: 14, backgroundColor: '#e2e8f0', borderRadius: 20, marginRight: 8 },
+  chipActive: { backgroundColor: '#ea580c' },
+  chipText: { color: '#334155', fontWeight: '600' },
+  chipTextActive: { color: 'white' },
+  categoriesWrap: { flexDirection: 'row', flexWrap: 'wrap' },
+  categoryPill: { paddingVertical: 6, paddingHorizontal: 12, backgroundColor: '#e2e8f0', borderRadius: 20, marginRight: 8, marginBottom: 8 },
+  categoryPillActive: { backgroundColor: '#ea580c' },
+  categoryPillText: { color: '#334155', fontWeight: '600' },
+  categoryPillTextActive: { color: 'white' },
+  textInputBox: { backgroundColor: '#f8fafc', paddingVertical: 12, paddingHorizontal: 16, borderRadius: 12, borderWidth: 1, borderColor: '#e2e8f0', fontSize: 16 },
+  textInputPlaceholder: { color: '#94a3b8' },
+  customRow: { flexDirection: 'row', alignItems: 'center' },
+  customInputBox: { flex: 1, backgroundColor: '#f8fafc', paddingVertical: 12, paddingHorizontal: 16, borderRadius: 12, marginRight: 8, borderWidth: 1, borderColor: '#e2e8f0', fontSize: 16 },
+  customInputPlaceholder: { color: '#94a3b8' },
+  addCatButton: { backgroundColor: '#ea580c', paddingVertical: 12, paddingHorizontal: 16, borderRadius: 12, shadowColor: '#ea580c', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.2, shadowRadius: 2, elevation: 2 },
+  addCatButtonText: { color: 'white', fontWeight: '700' },
+  actionsRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 },
+  primaryButton: { flex: 1, backgroundColor: '#ea580c', paddingVertical: 16, borderRadius: 12, alignItems: 'center', marginRight: 8, shadowColor: '#ea580c', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 3 },
+  primaryButtonText: { color: 'white', fontWeight: '700' },
+  secondaryButton: { flex: 1, backgroundColor: '#f1f5f9', paddingVertical: 16, borderRadius: 12, alignItems: 'center', marginLeft: 8, borderWidth: 1, borderColor: '#e2e8f0' },
+  secondaryButtonText: { color: '#334155', fontWeight: '700' },
+  // Simple inline modal styles
+  modalOverlay: { position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(0,0,0,0.35)', alignItems: 'center', justifyContent: 'center' },
+  modalCard: { width: '85%', backgroundColor: 'white', borderRadius: 12, padding: 16 },
+  modalTitle: { fontSize: 18, fontWeight: '700', color: '#1e293b', marginBottom: 6, textAlign: 'center' },
+  modalText: { fontSize: 14, color: '#475569', textAlign: 'center', marginBottom: 16 },
+  modalActions: { flexDirection: 'row', justifyContent: 'space-between' },
+  modalButton: { flex: 1, paddingVertical: 10, borderRadius: 8, alignItems: 'center' },
+  modalPrimary: { backgroundColor: '#ea580c', marginRight: 8 },
+  modalSecondary: { backgroundColor: '#e2e8f0', marginLeft: 8 },
+  modalPrimaryText: { color: 'white', fontWeight: '700' },
+  modalSecondaryText: { color: '#334155', fontWeight: '700' },
 });
-
-  const formStyles = StyleSheet.create({
-    container: {
-      backgroundColor: 'white',
-      padding: 16,
-      borderRadius: 8,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 3.84,
-      elevation: 3,
-      marginHorizontal: 16,
-      marginBottom: 16,
-    },
-    title: {
-      fontSize: 20,
-      fontWeight: 'bold',
-      marginBottom: 16,
-      color: '#1e293b',
-      textAlign: 'center',
-    },
-    input: {
-      height: 48,
-      borderColor: '#cbd5e1',
-      borderWidth: 1,
-      borderRadius: 8,
-      marginBottom: 12,
-      paddingHorizontal: 12,
-      backgroundColor: '#ffffff',
-      fontSize: 15,
-      color: '#334155',
-    },
-    label: {
-      fontSize: 15,
-      marginBottom: 6,
-      color: '#475569',
-      fontWeight: '500',
-    },
-    picker: {
-      height: 48,
-      borderColor: '#cbd5e1',
-      borderWidth: 1,
-      borderRadius: 8,
-      marginBottom: 12,
-      backgroundColor: '#ffffff',
-      color: '#334155',
-    },
-    addButton: {
-      backgroundColor: '#059669',
-      paddingVertical: 12,
-      borderRadius: 8,
-      alignItems: 'center',
-      marginTop: 12,
-    },
-    cancelButton: {
-        backgroundColor: '#ef4444',
-        marginTop: 8,
-    },
-    addButtonText: {
-      color: '#ffffff',
-      fontSize: 16,
-      fontWeight: '600',
-    },
-    datePickerButton: {
-      height: 48,
-      borderColor: '#cbd5e1',
-      borderWidth: 1,
-      borderRadius: 8,
-      marginBottom: 12,
-      paddingHorizontal: 12,
-      backgroundColor: '#ffffff',
-      justifyContent: 'center',
-    },
-    datePickerButtonText: {
-      fontSize: 15,
-      color: '#334155',
-    },
-  });
