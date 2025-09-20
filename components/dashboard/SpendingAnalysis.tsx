@@ -1,35 +1,88 @@
 
-import React from 'react';
-import { StyleSheet, View, Text } from 'react-native';
 import { useTransactions } from '@/src/transactions/TransactionsContext';
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
+import { Dimensions, StyleSheet, Text, View } from 'react-native';
+import { PieChart } from 'react-native-chart-kit';
 
-export default function RecentTransactions() {
+const { width } = Dimensions.get('window');
+
+// Pre-defined colors for categories for a better look
+const categoryColors: Record<string, string> = {
+    Food: '#f59e0b', // amber-500
+    Transport: '#3b82f6', // blue-500
+    Shopping: '#8b5cf6', // violet-500
+    Bills: '#ef4444', // red-500
+    Entertainment: '#14b8a6', // teal-500
+    Salary: '#10b981', // emerald-500 (though usually not in expenses)
+    Other: '#64748b', // slate-500
+};
+
+export default function SpendingAnalysis() {
   const { transactions } = useTransactions();
 
-  const recentTransactions = useMemo(() => {
-    // Filter out income if you only want expenses, or adjust as needed
-    return transactions.slice(0, 3); // Get top 3 most recent
+  const { pieChartData, categoryTotals } = useMemo(() => {
+    const expenseTransactions = transactions.filter(t => t.type === 'expense');
+    const categoryTotals: Record<string, number> = expenseTransactions.reduce(
+      (acc: Record<string, number>, t) => {
+        acc[t.category] = (acc[t.category] || 0) + t.amount;
+        return acc;
+      },
+      {}
+    );
+
+    const pieChartData = Object.keys(categoryTotals).map(category => ({
+      name: category,
+      population: categoryTotals[category],
+      color: categoryColors[category] || categoryColors.Other,
+      legendFontColor: '#7F7F7F',
+      legendFontSize: 14,
+    }));
+
+    return { pieChartData, categoryTotals };
   }, [transactions]);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.subtitle}>Recent Transactions</Text>
-      {recentTransactions.length > 0 ? (
-        recentTransactions.map(t => (
-          <View key={t.id} style={styles.transaction}>
-            <View>
-              <Text style={styles.description}>{t.description}</Text>
-              <Text style={styles.categoryDate}>{t.category} - {t.date}</Text>
-            </View>
-            <Text style={t.type === 'income' ? styles.income : styles.expense}>
-              {t.type === 'income' ? '+' : '-'} ${t.amount.toFixed(2)}
-            </Text>
-          </View>
-        ))
+      <Text style={styles.subtitle}>Spending Analysis</Text>
+
+      {pieChartData.length > 0 ? (
+        <PieChart
+          data={pieChartData}
+          width={width - 32}
+          height={200}
+          chartConfig={{
+            backgroundColor: '#ffffff',
+            backgroundGradientFrom: '#ffffff',
+            backgroundGradientTo: '#ffffff',
+            decimalPlaces: 2,
+            color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+            labelColor: (opacity = 1) => `rgba(100, 116, 139, ${opacity})`,
+            propsForLabels: { // Added to prevent error on web if labels are too long
+                fontSize: 10, 
+            },
+          }}
+          accessor={"population"}
+          backgroundColor={"transparent"}
+          paddingLeft={"15"}
+          center={[10, 10]}
+          absolute
+          style={{ marginVertical: 8, borderRadius: 16 }}
+        />
       ) : (
-        <Text style={styles.emptyText}>No recent transactions.</Text>
+        <Text style={styles.emptyText}>No expense data available.</Text>
       )}
+
+      <View style={styles.categorySummary}>
+        {Object.keys(categoryTotals).map(category => (
+          <View key={category} style={styles.categoryItem}>
+            <View style={styles.categoryInfo}>
+                <View style={[styles.colorSquare, { backgroundColor: categoryColors[category] || categoryColors.Other }]} />
+                <Text style={styles.categoryText}>{category}</Text>
+            </View>
+            <Text style={styles.categoryAmount}>LKR {categoryTotals[category].toFixed(2)}</Text>
+          </View>
+        ))}
+      </View>
     </View>
   );
 }
@@ -38,7 +91,7 @@ const styles = StyleSheet.create({
   container: {
     marginTop: 16,
     padding: 16,
-    borderRadius: 8,
+    borderRadius: 12,
     backgroundColor: '#fff',
     shadowColor: '#000',
     shadowOffset: {
@@ -51,40 +104,51 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
   },
   subtitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 12,
-    color: '#1e293b',
-  },
-  transaction: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
-  },
-  description: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#334155',
-  },
-  categoryDate: {
-    fontSize: 12,
-    color: '#64748b',
-    marginTop: 2,
-  },
-  income: {
-    color: '#10b981',
-    fontWeight: 'bold',
-  },
-  expense: {
-    color: '#ef4444',
-    fontWeight: 'bold',
+    fontSize: 20,
+    fontWeight: '800',
+    marginBottom: 16,
+    color: '#0f172a',
+    textAlign: 'center',
+    letterSpacing: -0.3,
   },
   emptyText: {
     textAlign: 'center',
     color: '#64748b',
     marginTop: 10,
-  }
+  },
+  categorySummary: {
+    marginTop: 16,
+  },
+  categoryItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+    backgroundColor: '#f8fafc',
+    marginVertical: 2,
+    borderRadius: 8,
+  },
+  categoryInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  colorSquare: {
+    width: 16,
+    height: 16,
+    borderRadius: 4,
+    marginRight: 12,
+  },
+  categoryText: {
+    fontSize: 15,
+    color: '#475569',
+    fontWeight: '600',
+  },
+  categoryAmount: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#0f172a',
+  },
 });
