@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, Button, TextInput } from 'react-native';
+import { useState } from 'react';
+import { Button, FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useTransactions } from '../transactions/TransactionsContext';
 import { Transaction } from '../types';
 
@@ -10,7 +10,7 @@ const TransactionsScreen = () => {
 
   const handleAddOrUpdate = (transaction: Omit<Transaction, 'id'>) => {
     if (editingTransaction) {
-      updateTransaction({ ...editingTransaction, ...transaction });
+      updateTransaction(editingTransaction.id, { ...editingTransaction, ...transaction });
       setEditingTransaction(null);
     } else {
       addTransaction(transaction);

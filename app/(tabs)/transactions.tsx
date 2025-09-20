@@ -1,10 +1,10 @@
 import { useAuth } from '@/src/auth/AuthContext';
 import { useTransactions } from '@/src/transactions/TransactionsContext';
 import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useMemo, useState } from 'react';
-import { FlatList, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useMemo, useState } from 'react';
+import { FlatList, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 // A more detailed transaction item
 interface TransactionItemProps {
@@ -33,7 +33,7 @@ const TransactionItem = ({ transaction, onDelete, onEdit }: TransactionItemProps
 );
 
 export default function TransactionsScreen() {
-  const { transactions, loading, deleteTransaction, addTransaction } = useTransactions();
+  const { transactions, loading, deleteTransaction, addTransaction, updateTransaction } = useTransactions();
   const { user, updateUserCustomCategories } = useAuth();
   const [filter, setFilter] = useState('all'); // 'all', 'income', 'expense'
   const router = useRouter();
@@ -115,9 +115,19 @@ export default function TransactionsScreen() {
     if (!finalCategory) return;
 
     if (isEditing && editingId) {
-      // Editing flow could be added if update screen is desired here
-      // For now, navigate to edit screen for consistency
-      router.push(`/edit-transaction?id=${editingId}`);
+      // Update existing transaction
+      try {
+        await updateTransaction(editingId, {
+          description: description.trim(),
+          amount: parsedAmount,
+          category: finalCategory,
+          type: type,
+          date,
+        });
+        resetForm();
+      } catch (error) {
+        console.error('Error updating transaction:', error);
+      }
       return;
     }
 
@@ -136,9 +146,16 @@ export default function TransactionsScreen() {
     return transactions.filter(t => t.type === filter);
   }, [transactions, filter]);
   
-  const onEdit = (transaction: { id: string }) => {
-    // Navigate to an edit screen, passing the transaction ID
-    router.push(`/edit-transaction?id=${transaction.id}`);
+  const onEdit = (transaction: { id: string; description: string; amount: number; category: string; type: 'income' | 'expense'; date: string }) => {
+    // Set up inline editing
+    setIsEditing(true);
+    setEditingId(transaction.id);
+    setType(transaction.type);
+    setCategory(transaction.category);
+    setDescription(transaction.description);
+    setAmount(transaction.amount.toString());
+    setDate(transaction.date);
+    setDateObj(new Date(transaction.date));
   };
 
   const onDelete = (id: string) => {
