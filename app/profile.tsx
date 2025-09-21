@@ -1,7 +1,9 @@
+import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
+  Image,
   StyleSheet,
   Text,
   TextInput,
@@ -11,12 +13,15 @@ import {
 import { useAuth } from "../src/auth/AuthContext";
 
 export default function ProfilePage() {
-  const { user, logout, updateProfile } = useAuth();
+  const { user, logout, updateProfile, uploadPhoto, changePassword } =
+    useAuth();
   const router = useRouter();
 
   const [displayName, setDisplayName] = useState(user?.name || "");
   const [email, setEmail] = useState(user?.email || "");
   const [saving, setSaving] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   const onSave = async () => {
     setSaving(true);
@@ -32,9 +37,70 @@ export default function ProfilePage() {
     }
   };
 
+  const pickImageAndUpload = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert("Permission required", "Please grant photo permissions");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.8,
+    });
+    if (!result.cancelled) {
+      try {
+        setUploading(true);
+        const url = await uploadPhoto!(result.uri);
+        Alert.alert("Photo uploaded");
+      } catch (e) {
+        console.error(e);
+        Alert.alert("Upload failed");
+      } finally {
+        setUploading(false);
+      }
+    }
+  };
+
+  const onChangePassword = async () => {
+    if (!newPassword) {
+      Alert.alert("Enter a new password");
+      return;
+    }
+    try {
+      // @ts-ignore
+      await changePassword(newPassword);
+      Alert.alert("Password changed");
+      setNewPassword("");
+    } catch (e: any) {
+      console.error(e);
+      Alert.alert("Password change failed", e.message || String(e));
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Profile</Text>
+
+      {user?.photoURL ? (
+        <Image
+          source={{ uri: user.photoURL }}
+          style={{ width: 96, height: 96, borderRadius: 48, marginBottom: 12 }}
+        />
+      ) : (
+        <Image
+          source={{ uri: "https://i.pravatar.cc/150" }}
+          style={{ width: 96, height: 96, borderRadius: 48, marginBottom: 12 }}
+        />
+      )}
+
+      <TouchableOpacity
+        style={{ marginBottom: 12 }}
+        onPress={pickImageAndUpload}
+      >
+        <Text style={{ color: "#ea580c", fontWeight: "700" }}>
+          {uploading ? "Uploading..." : "Change Photo"}
+        </Text>
+      </TouchableOpacity>
 
       <Text style={styles.label}>Name</Text>
       <TextInput
@@ -57,6 +123,21 @@ export default function ProfilePage() {
         disabled={saving}
       >
         <Text style={styles.saveText}>{saving ? "Saving..." : "Save"}</Text>
+      </TouchableOpacity>
+
+      <Text style={[styles.label, { marginTop: 18 }]}>Change Password</Text>
+      <TextInput
+        style={styles.input}
+        value={newPassword}
+        onChangeText={setNewPassword}
+        placeholder="New password"
+        secureTextEntry
+      />
+      <TouchableOpacity
+        style={[styles.saveButton, { backgroundColor: "#2563eb" }]}
+        onPress={onChangePassword}
+      >
+        <Text style={styles.saveText}>Change Password</Text>
       </TouchableOpacity>
 
       <TouchableOpacity

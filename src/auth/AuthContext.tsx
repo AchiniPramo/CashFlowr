@@ -1,13 +1,19 @@
 import {
   createUserWithEmailAndPassword,
+  updatePassword as firebaseUpdatePassword,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import {
+  getDownloadURL,
+  ref as storageRef,
+  uploadBytes,
+} from "firebase/storage";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Alert } from "react-native";
-import { auth, db } from "../firebase";
+import { auth, db, storage } from "../firebase";
 import { UserProfile } from "../types";
 
 interface AuthContextType {
@@ -22,6 +28,8 @@ interface AuthContextType {
     categories: string[]
   ) => Promise<void>;
   updateProfile?: (data: { displayName?: string }) => Promise<void>;
+  uploadPhoto?: (fileURI: string) => Promise<string>;
+  changePassword?: (newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -143,6 +151,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const uploadPhoto = async (fileURI: string) => {
+    if (!auth.currentUser) throw new Error("Not authenticated");
+    // Read file as blob using fetch
+    const response = await fetch(fileURI);
+    const blob = await response.blob();
+    const storagePath = `users/${auth.currentUser.uid}/avatar.jpg`;
+    const r = storageRef(storage, storagePath);
+    await uploadBytes(r, blob);
+    const url = await getDownloadURL(r);
+    const userDocRef = doc(db, "users", auth.currentUser.uid);
+    await updateDoc(userDocRef, { photoURL: url });
+    setUser((prev) => (prev ? { ...prev, photoURL: url } : prev));
+    return url;
+  };
+
+  const changePassword = async (newPassword: string) => {
+    if (!auth.currentUser) throw new Error("Not authenticated");
+    try {
+      await firebaseUpdatePassword(auth.currentUser, newPassword);
+    } catch (e) {
+      throw e;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -153,6 +185,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         logout,
         updateUserCustomCategories,
         updateProfile,
+        uploadPhoto,
+        changePassword,
       }}
     >
       {children}

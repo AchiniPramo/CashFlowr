@@ -1,8 +1,9 @@
 // Import the functions you need from the SDKs you need
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { initializeApp } from "firebase/app";
 import { getAuth, initializeAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -24,7 +25,7 @@ let authInstance;
 try {
   // Dynamically require to avoid type/resolve issues if subpath is missing
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { getReactNativePersistence } = require('firebase/auth/react-native');
+  const { getReactNativePersistence } = require("firebase/auth/react-native");
   authInstance = initializeAuth(app, {
     persistence: getReactNativePersistence(AsyncStorage),
   });
@@ -35,4 +36,4 @@ try {
 
 export const auth = authInstance;
 export const db = getFirestore(app);
-
+export const storage = getStorage(app);
