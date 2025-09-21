@@ -16,7 +16,8 @@
         "foregroundImage": "./assets/images/Cashflowr2.jpeg",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.achinipramodhya.cashflowr"
     },
     "web": {
       "bundler": "metro",
@@ -37,6 +38,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "4556814e-2b36-4803-a2fe-99fe32376ec0"
+      }
     }
   }
 }
