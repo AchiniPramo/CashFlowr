@@ -39,28 +39,33 @@ export default function ProfilePage() {
   };
 
   const pickImageAndUpload = async () => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert("Permission required", "Please grant photo permissions");
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.8,
-      allowsEditing: true,
-      aspect: [1, 1],
-    });
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      try {
-        setUploading(true);
-        await uploadPhoto!(result.assets[0].uri);
-        Alert.alert("Photo uploaded successfully");
-      } catch (e) {
-        console.error(e);
-        Alert.alert("Upload failed", "Please try again");
-      } finally {
-        setUploading(false);
+    try {
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        Alert.alert("Permission required", "Please grant photo permissions");
+        return;
       }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        quality: 0.8,
+        allowsEditing: true,
+        aspect: [1, 1],
+      });
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        try {
+          setUploading(true);
+          await uploadPhoto!(result.assets[0].uri);
+          Alert.alert("Photo uploaded successfully");
+        } catch (e) {
+          console.error(e);
+          Alert.alert("Upload failed", "Please check your internet connection and try again");
+        } finally {
+          setUploading(false);
+        }
+      }
+    } catch (error) {
+      console.error("Image picker error:", error);
+      Alert.alert("Error", "Failed to open image picker");
     }
   };
 

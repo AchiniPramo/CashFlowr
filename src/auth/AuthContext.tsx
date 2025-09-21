@@ -1,15 +1,15 @@
 import {
-    createUserWithEmailAndPassword,
-    updatePassword as firebaseUpdatePassword,
-    onAuthStateChanged,
-    signInWithEmailAndPassword,
-    signOut,
+  createUserWithEmailAndPassword,
+  updatePassword as firebaseUpdatePassword,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
 } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import {
-    getDownloadURL,
-    ref as storageRef,
-    uploadBytes,
+  getDownloadURL,
+  ref as storageRef,
+  uploadBytes,
 } from "firebase/storage";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Alert } from "react-native";
@@ -160,6 +160,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       // Read file as blob using fetch
       const response = await fetch(fileURI);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const blob = await response.blob();
       const storagePath = `users/${auth.currentUser.uid}/avatar.jpg`;
       const r = storageRef(storage, storagePath);
