@@ -1,7 +1,7 @@
 import { Slot, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
 import { Text } from "react-native"; // Import Text for loading state
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AuthProvider, useAuth } from "../src/auth/AuthContext";
 import { TransactionsProvider } from "../src/transactions/TransactionsContext";
 
@@ -12,11 +12,16 @@ const AuthRedirector = () => {
 
   useEffect(() => {
     const inTabsGroup = segments[0] === "(tabs)";
-    if (user && !inTabsGroup) {
+    const allowedWhenAuthenticated = ["profile"];
+    if (
+      user &&
+      !inTabsGroup &&
+      !allowedWhenAuthenticated.includes(segments[0] || "")
+    ) {
       router.replace("/(tabs)");
     } else if (!user && inTabsGroup) {
       router.replace("/login");
-    } else if (!user && segments[0] !== 'login' && segments[0] !== 'register') {
+    } else if (!user && segments[0] !== "login" && segments[0] !== "register") {
       router.replace("/login");
     }
   }, [user, segments]);
