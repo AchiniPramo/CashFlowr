@@ -1,11 +1,14 @@
 import { useAuth } from '@/src/auth/AuthContext';
 import { useTransactions } from '@/src/transactions/TransactionsContext';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { BarChart } from 'react-native-chart-kit';
+import RecentTransactions from '../../components/dashboard/RecentTransaction';
 import SpendingAnalysis from '../../components/dashboard/SpendingAnalysis';
+import Summary from '../../components/dashboard/Summary';
 
 const { width } = Dimensions.get('window');
 
@@ -64,101 +67,157 @@ const DashboardScreen = () => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <View>
-          <Text style={styles.greeting}>Hello, {user?.name || 'User'}!</Text>
-          <Text style={styles.subGreeting}>Welcome to your financial hub.</Text>
+        <View style={styles.headerContent}>
+          <View>
+            <Text style={styles.greeting}>Hello, {user?.name || 'User'}!</Text>
+            <Text style={styles.subGreeting}>Welcome to your financial hub</Text>
+          </View>
+          <View style={styles.headerIcon}>
+            <Ionicons name="wallet" size={32} color="#ea580c" />
+          </View>
         </View>
       </View>
 
+      <Summary />
       <SpendingAnalysis />
+      <RecentTransactions />
 
-
-      <View style={styles.summaryContainer}>
-        <View style={styles.summaryBox}>
-          <Text style={styles.summaryLabel}>Balance</Text>
-          <Text style={styles.summaryValue}>LKR {balance.toFixed(2)}</Text>
-        </View>
-        <View style={styles.summaryBox}>
-          <Text style={styles.summaryLabel}>Income</Text>
-          <Text style={[styles.summaryValue, { color: '#10b981' }]}>LKR {totalIncome.toFixed(2)}</Text>
-        </View>
-        <View style={styles.summaryBox}>
-          <Text style={styles.summaryLabel}>Expense</Text>
-          <Text style={[styles.summaryValue, { color: '#ef4444' }]}>LKR {totalExpenses.toFixed(2)}</Text>
-        </View>
-      </View>
-
-      <TouchableOpacity style={styles.addButton} onPress={() => router.push('/transactions')}>
-        <Ionicons name="add-circle" size={22} color="white" />
-        <Text style={styles.addButtonText}>Add New Transaction</Text>
-      </TouchableOpacity>
+      <LinearGradient colors={['#ea580c', '#dc2626']} style={styles.addButton}>
+        <TouchableOpacity style={styles.addButtonInner} onPress={() => router.push('/transactions')}>
+          <Ionicons name="add-circle" size={24} color="white" />
+          <Text style={styles.addButtonText}>Add New Transaction</Text>
+        </TouchableOpacity>
+      </LinearGradient>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Income vs. Expense (Last 7 Days)</Text>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Income vs. Expense (Last 7 Days)</Text>
+          <View style={styles.sectionAccent} />
+        </View>
         <BarChart
           data={chartData}
-          width={width - 32} // from react-native
-          height={220}
+          width={width - 64}
+          height={240}
           yAxisLabel="LKR "
           yAxisSuffix=""
           chartConfig={{
-            backgroundColor: '#ffffff',
-            backgroundGradientFrom: '#ffffff',
-            backgroundGradientTo: '#ffffff',
+            backgroundColor: 'transparent',
+            backgroundGradientFrom: 'transparent',
+            backgroundGradientTo: 'transparent',
             decimalPlaces: 0,
-            barPercentage: 0.6,
+            barPercentage: 0.7,
             color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-            labelColor: (opacity = 1) => `rgba(100, 116, 139, ${opacity})`,
+            labelColor: (opacity = 1) => `rgba(55, 65, 81, ${opacity})`,
             propsForBackgroundLines: {
               strokeDasharray: '0',
-              stroke: '#e2e8f0',
+              stroke: '#e5e7eb',
+            },
+            propsForLabels: {
+              fontSize: 12,
+              fontWeight: '600',
             },
           }}
-          style={{ marginVertical: 8, borderRadius: 16 }}
+          style={styles.chart}
         />
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Recent Transactions</Text>
-        {recentTransactions.length > 0 ? (
-          recentTransactions.map(t => (
-            <View key={t.id} style={styles.transactionItem}>
-              <View>
-                <Text style={styles.transactionDesc}>{t.description}</Text>
-                <Text style={styles.transactionDate}>{t.date}</Text>
-              </View>
-              <Text style={[styles.transactionAmount, t.type === 'income' ? styles.income : styles.expense]}>
-                {t.type === 'income' ? '+' : '-'} LKR {t.amount.toFixed(2)}
-              </Text>
-            </View>
-          ))
-        ) : (
-          <Text>No recent transactions.</Text>
-        )}
       </View>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f1f5f9' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: 'white' },
-  greeting: { fontSize: 24, fontWeight: 'bold', color: '#1e293b' },
-  subGreeting: { fontSize: 16, color: '#64748b' },
-  summaryContainer: { flexDirection: 'row', justifyContent: 'space-around', padding: 16, backgroundColor: 'white', marginHorizontal: 16, marginVertical: 8, borderRadius: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2, elevation: 2 },
-  summaryBox: { alignItems: 'center' },
-  summaryLabel: { fontSize: 14, color: '#64748b' },
-  summaryValue: { fontSize: 20, fontWeight: 'bold', color: '#1e293b' },
-  addButton: { flexDirection: 'row', backgroundColor: '#ea580c', padding: 16, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginHorizontal: 16, marginVertical: 8, shadowColor: '#ea580c', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 3 },
-  addButtonText: { color: 'white', fontSize: 16, fontWeight: '600', marginLeft: 8 },
-  section: { backgroundColor: 'white', padding: 16, marginHorizontal: 16, marginVertical: 8, borderRadius: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2, elevation: 2 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 8, color: '#1e293b' },
-  transactionItem: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 16, paddingHorizontal: 12, borderBottomWidth: 1, borderBottomColor: '#e2e8f0', backgroundColor: '#f8fafc', marginVertical: 2, borderRadius: 8 },
-  transactionDesc: { fontSize: 16, color: '#334155' },
-  transactionDate: { fontSize: 12, color: '#94a3b8' },
-  transactionAmount: { fontSize: 16, fontWeight: 'bold' },
-  income: { color: '#10b981' },
-  expense: { color: '#ef4444' },
+  container: { 
+    flex: 1, 
+    backgroundColor: '#f1f5f9' 
+  },
+  header: { 
+    backgroundColor: '#ffffff',
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  greeting: { 
+    fontSize: 28, 
+    fontWeight: '800', 
+    color: '#1f2937',
+    letterSpacing: -0.5,
+  },
+  subGreeting: { 
+    fontSize: 16, 
+    color: '#6b7280',
+    fontWeight: '500',
+    marginTop: 4,
+  },
+  headerIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#fef3c7',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addButton: { 
+    marginHorizontal: 16, 
+    marginVertical: 12,
+    borderRadius: 16,
+    shadowColor: '#ea580c',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  addButtonInner: {
+    flexDirection: 'row', 
+    padding: 18, 
+    alignItems: 'center', 
+    justifyContent: 'center',
+  },
+  addButtonText: { 
+    color: 'white', 
+    fontSize: 18, 
+    fontWeight: '700', 
+    marginLeft: 12,
+  },
+  section: { 
+    backgroundColor: '#ffffff',
+    padding: 20, 
+    marginHorizontal: 16, 
+    marginVertical: 8, 
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  sectionHeader: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  sectionTitle: { 
+    fontSize: 20, 
+    fontWeight: '800', 
+    color: '#1f2937',
+    letterSpacing: -0.3,
+    marginBottom: 8,
+  },
+  sectionAccent: {
+    width: 40,
+    height: 4,
+    backgroundColor: '#ea580c',
+    borderRadius: 2,
+  },
+  chart: {
+    borderRadius: 16,
+    marginVertical: 8,
+  },
 });
 
 export default DashboardScreen;

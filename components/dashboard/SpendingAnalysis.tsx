@@ -1,6 +1,6 @@
 
 import { useTransactions } from '@/src/transactions/TransactionsContext';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import { PieChart } from 'react-native-chart-kit';
 

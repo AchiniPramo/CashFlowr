@@ -1,7 +1,8 @@
-import React from 'react';
-import { StyleSheet, View, Text } from 'react-native';
 import { useTransactions } from '@/src/transactions/TransactionsContext';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useMemo } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
 export default function Summary() {
   const { transactions } = useTransactions();
@@ -17,64 +18,139 @@ export default function Summary() {
   }, [transactions]);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.subtitle}>Summary</Text>
-      <View style={styles.row}>
-        <Text>Income</Text>
-        <Text style={styles.incomeText}>${totalIncome.toFixed(2)}</Text>
+    <LinearGradient colors={['#ffffff', '#f8fafc']} style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.subtitle}>Financial Summary</Text>
+        <View style={styles.headerAccent} />
       </View>
-      <View style={styles.row}>
-        <Text>Expenses</Text>
-        <Text style={styles.expenseText}>${totalExpenses.toFixed(2)}</Text>
+      
+      <View style={styles.summaryGrid}>
+        <LinearGradient colors={['#10b981', '#059669']} style={styles.summaryCard}>
+          <View style={styles.cardContent}>
+            <Ionicons name="trending-up" size={24} color="white" />
+            <Text style={styles.cardLabel}>Income</Text>
+            <Text style={styles.cardAmount}>LKR {totalIncome.toFixed(2)}</Text>
+          </View>
+        </LinearGradient>
+
+        <LinearGradient colors={['#ef4444', '#dc2626']} style={styles.summaryCard}>
+          <View style={styles.cardContent}>
+            <Ionicons name="trending-down" size={24} color="white" />
+            <Text style={styles.cardLabel}>Expenses</Text>
+            <Text style={styles.cardAmount}>LKR {totalExpenses.toFixed(2)}</Text>
+          </View>
+        </LinearGradient>
       </View>
-      <View style={styles.row}>
-        <Text>Balance</Text>
-        <Text style={styles.balanceText}>${balance.toFixed(2)}</Text>
-      </View>
-    </View>
+
+      <LinearGradient 
+        colors={balance >= 0 ? ['#3b82f6', '#1d4ed8'] : ['#f59e0b', '#d97706']} 
+        style={styles.balanceCard}
+      >
+        <View style={styles.balanceContent}>
+          <Ionicons 
+            name={balance >= 0 ? "wallet" : "warning"} 
+            size={28} 
+            color="white" 
+          />
+          <Text style={styles.balanceLabel}>Balance</Text>
+          <Text style={styles.balanceAmount}>LKR {balance.toFixed(2)}</Text>
+        </View>
+      </LinearGradient>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
-    borderRadius: 8,
-    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 20,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 8,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 3,
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
     marginHorizontal: 16,
     marginVertical: 8,
   },
-  subtitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 12,
-    color: '#1e293b',
+  header: {
+    alignItems: 'center',
+    marginBottom: 20,
   },
-  row: {
+  subtitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#1f2937',
+    letterSpacing: -0.5,
+    marginBottom: 8,
+  },
+  headerAccent: {
+    width: 40,
+    height: 4,
+    backgroundColor: '#ea580c',
+    borderRadius: 2,
+  },
+  summaryGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  summaryCard: {
+    flex: 1,
+    marginHorizontal: 4,
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  cardContent: {
+    alignItems: 'center',
+  },
+  cardLabel: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
     marginTop: 8,
-    paddingVertical: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
+    marginBottom: 4,
   },
-  incomeText: {
-    color: '#10b981',
-    fontWeight: 'bold',
+  cardAmount: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '800',
   },
-  expenseText: {
-    color: '#ef4444',
-    fontWeight: 'bold',
+  balanceCard: {
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  balanceText: {
-    fontWeight: 'bold',
-    color: '#059669',
+  balanceContent: {
+    alignItems: 'center',
+  },
+  balanceLabel: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  balanceAmount: {
+    color: 'white',
+    fontSize: 24,
+    fontWeight: '800',
   },
 });

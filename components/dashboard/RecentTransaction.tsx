@@ -1,7 +1,6 @@
-import React from 'react';
-import { StyleSheet, View, Text } from 'react-native';
 import { useTransactions } from '@/src/transactions/TransactionsContext';
 import { useMemo } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
 export default function RecentTransactions() {
   const { transactions } = useTransactions();
