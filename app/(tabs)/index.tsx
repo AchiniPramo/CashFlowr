@@ -32,33 +32,43 @@ const DashboardScreen = () => {
   const recentTransactions = transactions.slice(0, 3);
 
   const chartData = useMemo(() => {
-    const labels: string[] = [];
-    const incomeData: number[] = [];
-    const expenseData: number[] = [];
-    const today = new Date();
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(today.getDate() - i);
-      const dateString = date.toISOString().split('T')[0];
-      labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-      const dailyIncome = transactions
-        .filter(t => t.date === dateString && t.type === 'income')
-        .reduce((sum, t) => sum + t.amount, 0);
-      incomeData.push(dailyIncome);
-      const dailyExpense = transactions
-        .filter(t => t.date === dateString && t.type === 'expense')
-        .reduce((sum, t) => sum + t.amount, 0);
-      expenseData.push(dailyExpense);
-    }
-    return {
-      labels,
-      datasets: [
-        { data: incomeData, color: (opacity = 1) => `rgba(34, 197, 94, ${opacity})` },
-        { data: expenseData, color: (opacity = 1) => `rgba(239, 68, 68, ${opacity})` },
-      ],
-      legend: ['Income', 'Expense'],
-    };
-  }, [transactions]);
+  const labels: string[] = [];
+  const incomeData: number[] = [];
+  const expenseData: number[] = [];
+  const today = new Date();
+
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(today.getDate() - i);
+    const dateString = date.toISOString().split('T')[0];
+    labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+    const dailyIncome = transactions
+      .filter(t => t.date === dateString && t.type === 'income')
+      .reduce((sum, t) => sum + t.amount, 0);
+    incomeData.push(dailyIncome);
+
+    const dailyExpense = transactions
+      .filter(t => t.date === dateString && t.type === 'expense')
+      .reduce((sum, t) => sum + t.amount, 0);
+    expenseData.push(dailyExpense);
+  }
+
+  return {
+    labels,
+    datasets: [
+      {
+        data: incomeData,
+        color: (opacity = 1) => `rgba(34, 197, 94, ${opacity})`, // modern green
+      },
+      {
+        data: expenseData,
+        color: (opacity = 1) => `rgba(239, 68, 68, ${opacity})`, // modern red
+      },
+    ],
+    legend: ['Income', 'Expense'],
+  };
+}, [transactions]);
+
 
   if (loading) {
     return <Text>Loading...</Text>;
@@ -94,31 +104,40 @@ const DashboardScreen = () => {
           <Text style={styles.sectionTitle}>Income vs. Expense (Last 7 Days)</Text>
           <View style={styles.sectionAccent} />
         </View>
-        <BarChart
-          data={chartData}
-          width={width - 64}
-          height={240}
-          yAxisLabel="LKR "
-          yAxisSuffix=""
-          chartConfig={{
-            backgroundColor: 'transparent',
-            backgroundGradientFrom: 'transparent',
-            backgroundGradientTo: 'transparent',
-            decimalPlaces: 0,
-            barPercentage: 0.7,
-            color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-            labelColor: (opacity = 1) => `rgba(55, 65, 81, ${opacity})`,
-            propsForBackgroundLines: {
-              strokeDasharray: '0',
-              stroke: '#e5e7eb',
-            },
-            propsForLabels: {
-              fontSize: 12,
-              fontWeight: '600',
-            },
-          }}
-          style={styles.chart}
-        />
+       <BarChart
+  data={chartData}
+  width={width - 64}
+  height={240}
+  fromZero
+  showBarTops={false}
+  yAxisLabel="LKR "
+  yAxisSuffix=""
+  chartConfig={{
+    backgroundColor: 'transparent',
+    backgroundGradientFrom: '#ffffff',
+    backgroundGradientTo: '#ffffff',
+    decimalPlaces: 0,
+    barPercentage: 0.6,
+    color: (opacity = 1) => `rgba(0,0,0,${opacity})`, // text color
+    labelColor: (opacity = 1) => `rgba(55,65,81,${opacity})`,
+    propsForBackgroundLines: {
+      strokeDasharray: '0',
+      stroke: '#e5e7eb',
+    },
+    propsForLabels: {
+      fontSize: 12,
+      fontWeight: '600',
+    },
+    style: {
+      borderRadius: 16,
+    },
+  }}
+  style={{
+    borderRadius: 16,
+    marginVertical: 8,
+  }}
+/>
+
       </View>
     </ScrollView>
   );
