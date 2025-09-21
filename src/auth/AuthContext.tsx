@@ -1,15 +1,15 @@
 import {
-  createUserWithEmailAndPassword,
-  updatePassword as firebaseUpdatePassword,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  signOut,
+    createUserWithEmailAndPassword,
+    updatePassword as firebaseUpdatePassword,
+    onAuthStateChanged,
+    signInWithEmailAndPassword,
+    signOut,
 } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import {
-  getDownloadURL,
-  ref as storageRef,
-  uploadBytes,
+    getDownloadURL,
+    ref as storageRef,
+    uploadBytes,
 } from "firebase/storage";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Alert } from "react-native";
@@ -53,6 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
               uid: firebaseUser.uid,
               email: firebaseUser.email,
               name: userDoc.data().name,
+              photoURL: userDoc.data().photoURL,
               customCategories: userDoc.data().customCategories,
             });
           } else {

@@ -4,14 +4,14 @@ import Constants from "expo-constants";
 import { Tabs, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  Image,
-  Modal,
-  Platform,
-  Pressable,
-  SafeAreaView,
-  Text,
-  TouchableOpacity,
-  View,
+    Image,
+    Modal,
+    Platform,
+    Pressable,
+    SafeAreaView,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 function AppHeader() {
@@ -250,6 +250,8 @@ export default function TabLayout() {
             iconName = focused ? "home" : "home-outline";
           } else if (route.name === "transactions") {
             iconName = focused ? "list" : "list-outline";
+          } else if (route.name === "analysis") {
+            iconName = focused ? "stats-chart" : "stats-chart-outline";
           }
 
           return <Ionicons name={iconName} size={size} color={color} />;
@@ -270,6 +272,12 @@ export default function TabLayout() {
         name="transactions"
         options={{
           title: "Transactions",
+        }}
+      />
+      <Tabs.Screen
+        name="analysis"
+        options={{
+          title: "Analysis",
         }}
       />
     </Tabs>

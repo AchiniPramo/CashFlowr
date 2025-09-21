@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import ProfileHeader from "../components/ProfileHeader";
 import { useAuth } from "../src/auth/AuthContext";
 
 export default function ProfilePage() {
@@ -47,10 +48,10 @@ export default function ProfilePage() {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.8,
     });
-    if (!result.cancelled) {
+    if (!result.canceled) {
       try {
         setUploading(true);
-        const url = await uploadPhoto!(result.uri);
+        const url = await uploadPhoto!(result.assets[0].uri);
         Alert.alert("Photo uploaded");
       } catch (e) {
         console.error(e);
@@ -77,30 +78,44 @@ export default function ProfilePage() {
     }
   };
 
+  // Get first letter of user's name for avatar fallback
+  const getInitials = (name: string | null) => {
+    if (!name) return "U";
+    return name.charAt(0).toUpperCase();
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Profile</Text>
+      <ProfileHeader showNavigation={true} />
+      
+      <View style={styles.content}>
+        <Text style={styles.heading}>Profile Settings</Text>
 
-      {user?.photoURL ? (
-        <Image
-          source={{ uri: user.photoURL }}
-          style={{ width: 96, height: 96, borderRadius: 48, marginBottom: 12 }}
-        />
-      ) : (
-        <Image
-          source={{ uri: "https://i.pravatar.cc/150" }}
-          style={{ width: 96, height: 96, borderRadius: 48, marginBottom: 12 }}
-        />
-      )}
+        {/* Profile Photo Section */}
+        <View style={styles.photoSection}>
+          {user?.photoURL ? (
+            <Image
+              source={{ uri: user.photoURL }}
+              style={styles.profileImage}
+            />
+          ) : (
+            <View style={[styles.profileImage, styles.avatarFallback]}>
+              <Text style={styles.avatarText}>
+                {getInitials(user?.name || null)}
+              </Text>
+            </View>
+          )}
 
-      <TouchableOpacity
-        style={{ marginBottom: 12 }}
-        onPress={pickImageAndUpload}
-      >
-        <Text style={{ color: "#ea580c", fontWeight: "700" }}>
-          {uploading ? "Uploading..." : "Change Photo"}
-        </Text>
-      </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.changePhotoButton}
+            onPress={pickImageAndUpload}
+            disabled={uploading}
+          >
+            <Text style={styles.changePhotoText}>
+              {uploading ? "Uploading..." : "Change Photo"}
+            </Text>
+          </TouchableOpacity>
+        </View>
 
       <Text style={styles.label}>Name</Text>
       <TextInput
@@ -140,15 +155,16 @@ export default function ProfilePage() {
         <Text style={styles.saveText}>Change Password</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.logoutButton}
-        onPress={async () => {
-          await logout();
-          router.replace("/login");
-        }}
-      >
-        <Text style={styles.logoutText}>Logout</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.logoutButton}
+          onPress={async () => {
+            await logout();
+            router.replace("/login");
+          }}
+        >
+          <Text style={styles.logoutText}>Logout</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -156,14 +172,48 @@ export default function ProfilePage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
     backgroundColor: "#fff",
   },
+  content: {
+    flex: 1,
+    padding: 16,
+  },
   heading: {
-    fontSize: 28,
-    fontWeight: "800",
+    fontSize: 24,
+    fontWeight: "700",
     color: "#ea580c",
     marginBottom: 24,
+  },
+  photoSection: {
+    alignItems: "center",
+    marginBottom: 32,
+  },
+  profileImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    marginBottom: 16,
+  },
+  avatarFallback: {
+    backgroundColor: "#ea580c",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  avatarText: {
+    color: "white",
+    fontSize: 48,
+    fontWeight: "700",
+  },
+  changePhotoButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: "#f1f5f9",
+  },
+  changePhotoText: {
+    color: "#ea580c",
+    fontWeight: "600",
+    fontSize: 16,
   },
   label: {
     fontSize: 14,
