@@ -1,6 +1,6 @@
-
 import React from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
+import { useTransactions } from '../transactions/TransactionsContext';
 
 const DashboardScreen = () => {
   const { transactions } = useTransactions();
@@ -17,15 +17,15 @@ const DashboardScreen = () => {
       <View style={styles.summaryContainer}>
         <View style={styles.summaryBox}>
           <Text style={styles.summaryLabel}>Total Balance</Text>
-          <Text style={styles.summaryValue}>${totalBalance.toFixed(2)}</Text>
+          <Text style={styles.summaryValue}>LKR {totalBalance.toFixed(2)}</Text>
         </View>
         <View style={styles.summaryBox}>
           <Text style={styles.summaryLabel}>Total Income</Text>
-          <Text style={styles.summaryValue}>${totalIncome.toFixed(2)}</Text>
+          <Text style={styles.summaryValue}>LKR {totalIncome.toFixed(2)}</Text>
         </View>
         <View style={styles.summaryBox}>
           <Text style={styles.summaryLabel}>Total Expense</Text>
-          <Text style={styles.summaryValue}>${totalExpense.toFixed(2)}</Text>
+          <Text style={styles.summaryValue}>LKR {totalExpense.toFixed(2)}</Text>
         </View>
       </View>
       <Text style={styles.subtitle}>Recent Transactions</Text>
@@ -36,7 +36,7 @@ const DashboardScreen = () => {
           <View style={styles.transactionItem}>
             <Text>{item.description}</Text>
             <Text style={{ color: item.type === 'income' ? 'green' : 'red' }}>
-              {item.type === 'income' ? '+' : '-'}${item.amount.toFixed(2)}
+              {item.type === 'income' ? '+' : '-'}LKR {item.amount.toFixed(2)}
             </Text>
           </View>
         )}

@@ -21,7 +21,7 @@ export default function RecentTransactions() {
               <Text style={styles.categoryDate}>{t.category} - {t.date}</Text>
             </View>
             <Text style={t.type === 'income' ? styles.income : styles.expense}>
-              {t.type === 'income' ? '+' : '-'} ${t.amount.toFixed(2)}
+              {t.type === 'income' ? '+' : '-'} LKR.{t.amount.toFixed(2)}
             </Text>
           </View>
         ))

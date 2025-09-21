@@ -79,8 +79,8 @@ const DashboardScreen = () => {
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <View>
-            <Text style={styles.greeting}>Hello, {user?.name || 'User'}!</Text>
-            <Text style={styles.subGreeting}>Welcome to your financial hub</Text>
+            <Text style={styles.greeting}>Hi, {user?.name || 'User'}!</Text>
+            <Text style={styles.subGreeting}>Welcome to Cashflowr</Text>
           </View>
           <View style={styles.headerIcon}>
             <Ionicons name="wallet" size={32} color="#ea580c" />
@@ -101,7 +101,7 @@ const DashboardScreen = () => {
 
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Income vs. Expense (Last 7 Days)</Text>
+          <Text style={styles.sectionTitle}>Income (Last 7 Days)</Text>
           <View style={styles.sectionAccent} />
         </View>
        <BarChart
