@@ -1,50 +1,143 @@
-# Welcome to your Expo app 👋
+# 💰 CashFlowr - Personal Finance Tracker
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+CashFlowr is a modern, intuitive personal finance management application built with React Native and Expo. Track your income and expenses, visualize your spending patterns, and take control of your financial health.
 
-## Get started
+![React Native](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Expo](https://img.shields.io/badge/Expo-000020?style=for-the-badge&logo=expo&logoColor=#D04A37)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
 
-1. Install dependencies
+## ✨ Features
 
+### 📊 Financial Tracking
+- **Income & Expense Management**: Easily add, edit, and delete transactions
+- **Categorization**: Organize transactions by custom categories
+- **Real-time Updates**: Instant synchronization across all devices
+- **Transaction History**: Complete history of all financial activities
+
+### 📱 Beautiful Interface
+- **Modern UI/UX**: Clean, intuitive design with smooth animations
+- **Dark/Light Mode**: Support for both themes (coming soon)
+- **Responsive Design**: Optimized for both mobile and web
+- **Visual Charts**: Graphical representation of your finances (coming soon)
+
+### 🔒 Security & Privacy
+- **User Authentication**: Secure login with Firebase Auth
+- **Data Encryption**: Your financial data is protected
+- **Private by Design**: Your data stays yours - we don't sell or share it
+
+### 🌟 Advanced Features
+- **Budget Planning**: Set and track monthly budgets
+- **Export Data**: Download your transactions as CSV/PDF
+- **Recurring Transactions**: Set up automatic recurring entries
+- **Multi-Currency Support**: Handle transactions in different currencies
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js (v16 or higher)
+- npm or yarn
+- Expo CLI
+- iOS Simulator (for iOS development) or Android Studio (for Android)
+
+### Installation
+
+1. **Clone the repository**
    ```bash
-   npm install
+   git clone https://github.com/AchiniPramo/CashFlowr.git
+   cd CashFlowr
    ```
 
-2. Start the app
+2. **Install dependencies**
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
 
+3. **Set up Firebase**
+   - Create a new Firebase project at [Firebase Console](https://console.firebase.google.com/)
+   - Enable Authentication and Firestore
+   - Copy your Firebase config and create a `firebase.ts` file in the `src` directory
+
+4. **Run the application**
    ```bash
    npx expo start
    ```
+   
+   - Press `a` to run on Android emulator
+   - Press `i` to run on iOS simulator
+   - Scan QR code with Expo Go app for physical device
 
-In the output, you'll find options to open the app in a
+## 📸 Screenshots
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+| Dashboard | Transactions | Analytics | Profile |
+|-----------|-------------|-----------|---------|
+| ![Dashboard](https://via.placeholder.com/200x400/3B82F6/FFFFFF?text=Dashboard) | ![Transactions](https://via.placeholder.com/200x400/10B981/FFFFFF?text=Transactions) | ![Analytics](https://via.placeholder.com/200x400/F59E0B/FFFFFF?text=Analytics) | ![Profile](https://via.placeholder.com/200x400/8B5CF6/FFFFFF?text=Profile) |
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## 🏗️ Project Structure
 
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+CashFlowr/
+├── app/                    # Main application screens
+│   ├── (tabs)/            # Tab navigation
+│   ├── _layout.tsx        # Root layout configuration
+│   └── ...                # Various screens
+├── assets/                # Static assets (images, fonts)
+├── components/            # Reusable UI components
+├── constants/             # App constants and configurations
+├── hooks/                 # Custom React hooks
+├── src/                   # Source code
+│   ├── auth/              # Authentication related code
+│   ├── transactions/      # Transaction management
+│   ├── types/             # TypeScript type definitions
+│   └── utils/             # Utility functions
+├── firebase.ts            # Firebase configuration
+└── ...
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## 🛠️ Technology Stack
 
-## Learn more
+- **Frontend Framework**: React Native with Expo
+- **Language**: TypeScript
+- **Navigation**: Expo Router
+- **Backend**: Firebase (Auth, Firestore, Storage)
+- **State Management**: React Context API
+- **UI Components**: React Native Elements + Custom Components
+- **Build Tool**: Expo CLI
 
-To learn more about developing your project with Expo, look at the following resources:
+## 📈 Upcoming Features
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- [ ] Data visualization with charts and graphs
+- [ ] Budget alerts and notifications
+- [ ] Receipt scanning with OCR
+- [ ] Investment tracking integration
+- [ ] Bill reminders and payment scheduling
+- [ ] Multi-language support
+- [ ] Dark/light theme toggle
+- [ ] Data export functionality
 
-## Join the community
+## 🙏 Acknowledgments
 
-Join our community of developers creating universal apps.
+- React Native community for excellent documentation
+- Expo team for amazing developer experience
+- Firebase for robust backend services
+- Contributors and testers who help improve CashFlowr
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## 📞 Support
+
+Having trouble with CashFlowr? 
+
+- Open an issue on GitHub
+- Email us at achinipramodhya4@gmail.com
+
+---
+
+<div align="center">
+Made with ❤️ by <a href="https://github.com/AchiniPramo">Achini Pramod</a>
+</div>
+
+<p align="center">
+⭐ Don't forget to star this repository if you find it useful!
+</p>
