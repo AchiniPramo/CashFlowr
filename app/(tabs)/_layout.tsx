@@ -52,14 +52,33 @@ function AppHeader() {
             onPress={() => setShowMenu((s) => !s)}
             activeOpacity={0.8}
           >
-            <Image
-              source={
-                user?.photoURL
-                  ? { uri: user.photoURL }
-                  : { uri: "https://i.pravatar.cc/100?img=12" }
-              }
-              style={{ width: 34, height: 34, borderRadius: 17 }}
-            />
+            {user?.photoURL ? (
+              <Image
+                source={{ uri: user.photoURL }}
+                style={{ width: 34, height: 34, borderRadius: 17 }}
+              />
+            ) : (
+              <View
+                style={{
+                  width: 34,
+                  height: 34,
+                  borderRadius: 17,
+                  backgroundColor: "#ea580c",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    color: "white",
+                    fontSize: 14,
+                    fontWeight: "700",
+                  }}
+                >
+                  {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
+                </Text>
+              </View>
+            )}
           </TouchableOpacity>
           <Modal
             visible={showMenu}

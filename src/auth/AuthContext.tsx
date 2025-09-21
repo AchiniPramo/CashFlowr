@@ -49,12 +49,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           const userDocRef = doc(db, "users", firebaseUser.uid);
           const userDoc = await getDoc(userDocRef);
           if (userDoc.exists()) {
+            const userData = userDoc.data();
             setUser({
               uid: firebaseUser.uid,
               email: firebaseUser.email,
-              name: userDoc.data().name,
-              photoURL: userDoc.data().photoURL,
-              customCategories: userDoc.data().customCategories,
+              name: userData.name,
+              photoURL: userData.photoURL || null,
+              customCategories: userData.customCategories,
             });
           } else {
             // Fallback if user doc doesn't exist (e.g., new user just signed up)
@@ -62,6 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
               uid: firebaseUser.uid,
               email: firebaseUser.email,
               name: firebaseUser.email?.split("@")[0] || "User",
+              photoURL: null,
               customCategories: { expense: [], income: [] },
             };
             await setDoc(userDocRef, newUser, { merge: true });
@@ -101,6 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       await setDoc(doc(db, "users", firebaseUser.uid), {
         name: name,
         email: email,
+        photoURL: null,
         customCategories: { expense: [], income: [] },
       });
     } catch (error: any) {
@@ -154,17 +157,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const uploadPhoto = async (fileURI: string) => {
     if (!auth.currentUser) throw new Error("Not authenticated");
-    // Read file as blob using fetch
-    const response = await fetch(fileURI);
-    const blob = await response.blob();
-    const storagePath = `users/${auth.currentUser.uid}/avatar.jpg`;
-    const r = storageRef(storage, storagePath);
-    await uploadBytes(r, blob);
-    const url = await getDownloadURL(r);
-    const userDocRef = doc(db, "users", auth.currentUser.uid);
-    await updateDoc(userDocRef, { photoURL: url });
-    setUser((prev) => (prev ? { ...prev, photoURL: url } : prev));
-    return url;
+    try {
+      // Read file as blob using fetch
+      const response = await fetch(fileURI);
+      const blob = await response.blob();
+      const storagePath = `users/${auth.currentUser.uid}/avatar.jpg`;
+      const r = storageRef(storage, storagePath);
+      await uploadBytes(r, blob);
+      const url = await getDownloadURL(r);
+      const userDocRef = doc(db, "users", auth.currentUser.uid);
+      await updateDoc(userDocRef, { photoURL: url });
+      // Update user state immediately
+      setUser((prev) => {
+        if (prev) {
+          return { ...prev, photoURL: url };
+        }
+        return prev;
+      });
+      return url;
+    } catch (error) {
+      console.error("Error uploading photo:", error);
+      throw error;
+    }
   };
 
   const changePassword = async (newPassword: string) => {

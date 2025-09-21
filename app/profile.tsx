@@ -47,15 +47,17 @@ export default function ProfilePage() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.8,
+      allowsEditing: true,
+      aspect: [1, 1],
     });
-    if (!result.canceled) {
+    if (!result.canceled && result.assets && result.assets.length > 0) {
       try {
         setUploading(true);
-        const url = await uploadPhoto!(result.assets[0].uri);
-        Alert.alert("Photo uploaded");
+        await uploadPhoto!(result.assets[0].uri);
+        Alert.alert("Photo uploaded successfully");
       } catch (e) {
         console.error(e);
-        Alert.alert("Upload failed");
+        Alert.alert("Upload failed", "Please try again");
       } finally {
         setUploading(false);
       }
