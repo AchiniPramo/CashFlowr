@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { FlatList, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 // A more detailed transaction item
 interface TransactionItemProps {
@@ -169,6 +169,7 @@ export default function TransactionsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
       {/* Inline Add/Edit Form */}
       <View style={styles.formCard}>
         <Text style={styles.formTitle}>{isEditing ? 'Edit Transaction' : 'Add New Transaction'}</Text>
@@ -286,7 +287,7 @@ export default function TransactionsScreen() {
             <Text style={styles.modalTitle}>Add New Transaction</Text>
             <Text style={styles.modalText}>Would you like to add a new transaction now?</Text>
             <View style={styles.modalActions}>
-              <TouchableOpacity onPress={() => { setShowAddPrompt(false); router.push('/add-transaction'); }} style={[styles.modalButton, styles.modalPrimary]}>
+              <TouchableOpacity onPress={() => { setShowAddPrompt(false); }} style={[styles.modalButton, styles.modalPrimary]}>
                 <Text style={styles.modalPrimaryText}>Open Form</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => setShowAddPrompt(false)} style={[styles.modalButton, styles.modalSecondary]}>
@@ -296,41 +297,44 @@ export default function TransactionsScreen() {
           </View>
         </View>
       )}
-      <Text style={styles.title}>All Transactions</Text>
-      
-      <View style={styles.filterContainer}>
-        <TouchableOpacity 
-          style={[styles.filterButton, filter === 'all' && styles.activeFilter]}
-          onPress={() => setFilter('all')}
-        >
-          <Text style={[styles.filterText, filter === 'all' && styles.activeFilterText]}>All</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.filterButton, filter === 'income' && styles.activeFilter]}
-          onPress={() => setFilter('income')}
-        >
-          <Text style={[styles.filterText, filter === 'income' && styles.activeFilterText]}>Income</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.filterButton, filter === 'expense' && styles.activeFilter]}
-          onPress={() => setFilter('expense')}
-        >
-          <Text style={[styles.filterText, filter === 'expense' && styles.activeFilterText]}>Expenses</Text>
-        </TouchableOpacity>
-      </View>
+        <Text style={styles.title}>All Transactions</Text>
+        
+        <View style={styles.filterContainer}>
+          <TouchableOpacity 
+            style={[styles.filterButton, filter === 'all' && styles.activeFilter]}
+            onPress={() => setFilter('all')}
+          >
+            <Text style={[styles.filterText, filter === 'all' && styles.activeFilterText]}>All</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.filterButton, filter === 'income' && styles.activeFilter]}
+            onPress={() => setFilter('income')}
+          >
+            <Text style={[styles.filterText, filter === 'income' && styles.activeFilterText]}>Income</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.filterButton, filter === 'expense' && styles.activeFilter]}
+            onPress={() => setFilter('expense')}
+          >
+            <Text style={[styles.filterText, filter === 'expense' && styles.activeFilterText]}>Expenses</Text>
+          </TouchableOpacity>
+        </View>
 
-      <FlatList
-        data={filteredTransactions}
-        renderItem={({ item }) => <TransactionItem transaction={item} onDelete={onDelete} onEdit={onEdit} />}
-        keyExtractor={(item) => item.id}
-        ListEmptyComponent={<Text style={styles.emptyText}>No transactions found.</Text>}
-      />
+        {filteredTransactions.map((item) => (
+          <TransactionItem key={item.id} transaction={item} onDelete={onDelete} onEdit={onEdit} />
+        ))}
+        
+        {filteredTransactions.length === 0 && (
+          <Text style={styles.emptyText}>No transactions found.</Text>
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8fafc', padding: 16 },
+  container: { flex: 1, backgroundColor: '#f8fafc' },
+  scrollContainer: { flex: 1, padding: 16 },
   title: { fontSize: 28, fontWeight: '800', color: '#0f172a', marginBottom: 20, letterSpacing: -0.5 },
   filterContainer: { flexDirection: 'row', marginBottom: 16, justifyContent: 'center' },
   filterButton: { paddingVertical: 12, paddingHorizontal: 20, borderRadius: 25, backgroundColor: '#f1f5f9', marginHorizontal: 6, minWidth: 80 },
