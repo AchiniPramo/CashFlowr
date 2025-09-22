@@ -47,9 +47,10 @@ CashFlowr is a modern, intuitive personal finance management application built w
    ```bash
    git clone https://github.com/AchiniPramo/CashFlowr.git
    cd CashFlowr
-   ```
+
 
 2. **Install dependencies**
+
    ```bash
    npm install
    # or
@@ -57,24 +58,31 @@ CashFlowr is a modern, intuitive personal finance management application built w
    ```
 
 3. **Set up Firebase**
-   - Create a new Firebase project at [Firebase Console](https://console.firebase.google.com/)
-   - Enable Authentication and Firestore
-   - Copy your Firebase config and create a `firebase.ts` file in the `src` directory
+
+   * Create a new Firebase project at [Firebase Console](https://console.firebase.google.com/)
+   * Enable Authentication and Firestore
+   * Copy your Firebase config and create a `firebase.ts` file in the `src` directory
 
 4. **Run the application**
+
    ```bash
    npx expo start
    ```
-   
-   - Press `a` to run on Android emulator
-   - Press `i` to run on iOS simulator
-   - Scan QR code with Expo Go app for physical device
+
+   * Press `a` to run on Android emulator
+   * Press `i` to run on iOS simulator
+   * Scan QR code with Expo Go app for physical device
 
 ## 📸 Screenshots
 
-| Dashboard | Transactions | Analytics | Profile |
-|-----------|-------------|-----------|---------|
+| Dashboard                                                                      | Transactions                                                                         | Analytics                                                                      | Profile                                                                    |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------- |
 | ![Dashboard](https://via.placeholder.com/200x400/3B82F6/FFFFFF?text=Dashboard) | ![Transactions](https://via.placeholder.com/200x400/10B981/FFFFFF?text=Transactions) | ![Analytics](https://via.placeholder.com/200x400/F59E0B/FFFFFF?text=Analytics) | ![Profile](https://via.placeholder.com/200x400/8B5CF6/FFFFFF?text=Profile) |
+
+## 🎥 Demo
+
+Watch the full demo of **CashFlowr** on YouTube:
+👉 [https://youtu.be/ylVvGL7jzUo?si=Sa9Svm9dtnKA7ooq](https://youtu.be/ylVvGL7jzUo?si=Sa9Svm9dtnKA7ooq)
 
 ## 🏗️ Project Structure
 
@@ -99,38 +107,38 @@ CashFlowr/
 
 ## 🛠️ Technology Stack
 
-- **Frontend Framework**: React Native with Expo
-- **Language**: TypeScript
-- **Navigation**: Expo Router
-- **Backend**: Firebase (Auth, Firestore, Storage)
-- **State Management**: React Context API
-- **UI Components**: React Native Elements + Custom Components
-- **Build Tool**: Expo CLI
+* **Frontend Framework**: React Native with Expo
+* **Language**: TypeScript
+* **Navigation**: Expo Router
+* **Backend**: Firebase (Auth, Firestore, Storage)
+* **State Management**: React Context API
+* **UI Components**: React Native Elements + Custom Components
+* **Build Tool**: Expo CLI
 
 ## 📈 Upcoming Features
 
-- [ ] Data visualization with charts and graphs
-- [ ] Budget alerts and notifications
-- [ ] Receipt scanning with OCR
-- [ ] Investment tracking integration
-- [ ] Bill reminders and payment scheduling
-- [ ] Multi-language support
-- [ ] Dark/light theme toggle
-- [ ] Data export functionality
+* [ ] Data visualization with charts and graphs
+* [ ] Budget alerts and notifications
+* [ ] Receipt scanning with OCR
+* [ ] Investment tracking integration
+* [ ] Bill reminders and payment scheduling
+* [ ] Multi-language support
+* [ ] Dark/light theme toggle
+* [ ] Data export functionality
 
 ## 🙏 Acknowledgments
 
-- React Native community for excellent documentation
-- Expo team for amazing developer experience
-- Firebase for robust backend services
-- Contributors and testers who help improve CashFlowr
+* React Native community for excellent documentation
+* Expo team for amazing developer experience
+* Firebase for robust backend services
+* Contributors and testers who help improve CashFlowr
 
 ## 📞 Support
 
-Having trouble with CashFlowr? 
+Having trouble with CashFlowr?
 
-- Open an issue on GitHub
-- Email us at achinipramodhya4@gmail.com
+* Open an issue on GitHub
+* Email us at [achinipramodhya4@gmail.com](mailto:achinipramodhya4@gmail.com)
 
 ---
 
@@ -141,3 +149,6 @@ Made with ❤️ by <a href="https://github.com/AchiniPramo">Achini Pramod</a>
 <p align="center">
 ⭐ Don't forget to star this repository if you find it useful!
 </p>
+```
+
+Do you want me to place the **YouTube demo link** also in the **top introduction (under the badges)** for more visibility, or keep it only in the `Demo` section?
