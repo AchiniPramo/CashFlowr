@@ -73,12 +73,6 @@ CashFlowr is a modern, intuitive personal finance management application built w
    * Press `i` to run on iOS simulator
    * Scan QR code with Expo Go app for physical device
 
-## 📸 Screenshots
-
-| Dashboard                                                                      | Transactions                                                                         | Analytics                                                                      | Profile                                                                    |
-| ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------- |
-| ![Dashboard](https://via.placeholder.com/200x400/3B82F6/FFFFFF?text=Dashboard) | ![Transactions](https://via.placeholder.com/200x400/10B981/FFFFFF?text=Transactions) | ![Analytics](https://via.placeholder.com/200x400/F59E0B/FFFFFF?text=Analytics) | ![Profile](https://via.placeholder.com/200x400/8B5CF6/FFFFFF?text=Profile) |
-
 ## 🎥 Demo
 
 Watch the full demo of **CashFlowr** on YouTube:
