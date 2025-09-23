@@ -1,159 +1,194 @@
 # 💰 CashFlowr - Personal Finance Tracker(React Native + Expo + Firebase)
 
-CashFlowr is a modern, intuitive personal finance management application built with React Native and Expo. Track your income and expenses, visualize your spending patterns, and take control of your financial health.
+**Your modern personal finance companion** — built with **Expo + React Native**, powered by **Firebase**, and designed with a clean modular architecture.
 
-<div align="center">
+---
 
 [![Expo](https://img.shields.io/badge/Expo-54.0.0-000020?style=for-the-badge\&logo=expo\&logoColor=white)](https://expo.dev)
 [![React Native](https://img.shields.io/badge/React%20Native-0.81-61DAFB?style=for-the-badge\&logo=react\&logoColor=white)](https://reactnative.dev)
 [![Firebase](https://img.shields.io/badge/Firebase-Auth%2FFirestore%2FStorage-FFCA28?style=for-the-badge\&logo=firebase\&logoColor=black)](https://firebase.google.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
 
-</div>
+---
+
+### 📊 Live Demo
+
+🎬 *Now Available* – Full walkthrough of features
+
+[![🎥 Watch Demo](https://img.shields.io/badge/🎥_Watch_Demo-Watch_Now-FF0000?style=for-the-badge\&logo=youtube\&logoColor=white\&labelColor=black)](https://youtu.be/ylVvGL7jzUo?si=ardyPbspaJIKVBBH)
+
+### 📲 Download APK
+
+[![📱 Download APK](https://img.shields.io/badge/📱_Download_APK-Available_Now-4285F4?style=for-the-badge\&logo=googledrive\&logoColor=white\&labelColor=black)](https://drive.google.com/file/d/1-lkjKk4TDxDcZSItsKzbgJh6d2UTEV56/view?usp=drive_link)
+
+### 🖥️ GitHub Repository
+
+[![🌐 View on GitHub](https://img.shields.io/badge/View_on_GitHub-CashFlowr-181717?style=for-the-badge\&logo=github)](https://github.com/AchiniPramo/CashFlowr.git)
+
+</div>  
 
 ---
 
-## 🔥 Live Demo & Downloads
+## ✨ Overview
 
-> **Video walkthrough:** Add your YouTube demo link here (optional)
+**CashFlowr** helps you:
 
-> **APK download:** Add a Google Drive or release link here (optional)
-
----
-
-## ✨ What is CashFlowr
-
-CashFlowr helps users track income, expenses, accounts, and savings goals from a clean, fast mobile app. Built with Expo and Firebase, the project focuses on realtime sync, secure authentication, and a smooth mobile-first UX.
+* Track **expenses, incomes, and accounts**
+* Securely log in with **Firebase Auth** (Email, Google, Apple)
+* Visualize your financial health with **real-time charts**
+* Enjoy a **smooth, modern mobile experience** with Expo + NativeWind
 
 ---
 
 ## 🚀 Key Features
 
-* 🔐 **Authentication**: Email/password, Google Sign-In (Android), Apple Sign-In (iOS)
-* 💳 **Accounts & Categories**: Create and manage accounts and categories with realtime listeners
-* 💸 **Transactions**: Add/edit/delete transactions with balance updates and date-range filters
-* 🎯 **Goals**: Create savings goals and track progress with visual indicators
-* 🖼️ **Profile images**: Upload from camera/gallery to Firebase Storage
-* 📊 **Dashboard**: Charts and summaries powered by `react-native-chart-kit` and animated UI with Moti
+* 🔐 **Authentication**
+
+  * Email + Password login
+  * Google Sign-In (Android)
+  * Apple Sign-In (iOS)
+  * Session persistence
+
+* 💳 **Accounts & Categories**
+
+  * Bootstrapped defaults for new users
+  * CRUD operations with **real-time listeners**
+  * Filter and search functionality
+
+* 💸 **Transactions**
+
+  * Add, edit, delete with **balance updates**
+  * Date range filters & recent feed
+  * Realtime Firestore sync
+
+* 🖼️ **Profile Images**
+
+  * Upload via **Camera/Gallery**
+  * Firebase Storage integration
+  * Drawer integration with fallback initials
+
+* 📊 **Dashboard**
+
+  * Beautiful charts (`react-native-chart-kit`)
+  * Animated UI with **Moti**
 
 ---
 
-## 🛠 Tech Stack
+## 🛠️ Tech Stack
 
-* **Framework**: Expo (SDK 54), React Native 0.81, TypeScript
-* **Navigation**: Expo Router / React Navigation
-* **UI**: NativeWind (Tailwind for RN), Moti, LinearGradient
+* **Framework**: Expo 54, React Native 0.81, TypeScript
+* **Navigation**: Expo Router, React Navigation
+* **UI**: NativeWind (Tailwind), Expo Components, Moti, LinearGradient
 * **Backend**: Firebase Auth, Firestore, Storage
-* **Build**: EAS (Expo Application Services)
+* **Build**: Expo Application Services (EAS) with profiles for dev/preview/prod
 
 ---
 
-## 📁 Project Structure
+## 📂 Project Structure
 
-```
-app/            # Screens & routing (Expo Router)
+```bash
+app/            # Screens & navigation (Expo Router)
 components/     # Reusable UI components
-context/        # Auth & global contexts
-services/       # Domain services (Account, Transaction, Goal, etc.)
-types/          # TypeScript types & interfaces
+context/        # Auth + global contexts
+services/       # Clean service APIs (Account, Transaction, etc.)
+types/          # TypeScript interfaces
 utils/          # Helpers & utilities
 firebase.ts     # Firebase initialization
-eas.json        # EAS build profiles
+eas.json        # Build profiles
 ```
 
 ---
 
-## ⚙️ Setup (Local Development)
+## 📲 Running Locally
 
 ### Prerequisites
 
-* Node.js (LTS)
-* Expo CLI (`npm install -g expo-cli`)
-* Android Studio (or a physical device)
+* Node.js LTS
+* Expo CLI
+* Android Studio (for emulator)
 
-### Install & run
+### Setup
 
 ```bash
-git clone https://github.com/AchiniPramo/CashFlowr.git
-cd CashFlowr
 npm install
-npm run start
-# to run on Android
-npm run android
+npm run start   # start Expo
+npm run android # run on emulator/device
 ```
 
-> If you want to run in a dev client with native modules, use EAS dev builds.
+Optional: Run on web (limited support) → `npm run web`
 
 ---
 
-## 🔑 Firebase Configuration
+## 📦 Building APK with EAS
 
-1. Create a Firebase project and enable **Authentication** (Email, Google, Apple)
-2. Create Firestore database and set rules to protect user data
-3. Create Storage bucket for profile images
-4. Copy SDK config values into `firebase.ts` or use environment variables / EAS secrets
+Preconfigured in `eas.json`:
 
-**Important:** Never commit API keys or service account files to the repo. Use `eas secret` or environment variables for production secrets.
+* **development** → Dev client + APK
+* **preview** → Internal dist + APK
+* **production** → Auto-increment versionCode + APK
 
----
-
-## 📦 EAS Builds (APK)
+Build:
 
 ```bash
+# Install & login
 npm install -g eas-cli
 eas login
+
+# Configure
 eas build:configure
-# Build Android production APK
+
+# Run build
 eas build -p android --profile production
 ```
 
-Configure `eas.json` to match your versioning, keystore, and distribution preferences.
+---
+
+## 🖥️ Screens & Navigation
+
+Organized via **Expo Router**:
+
+* `(auth)` → Login / Signup
+* `(account)` → Manage accounts
+* `(categories)` → Income/Expense categories
+* `(transaction)` → Add / Edit / History
+* `(dashboard)` → Overview & charts
+* `(settings)` → Profile, help
 
 ---
 
-## 🧩 Services Architecture
+## 🔒 Security Best Practices
 
-Services encapsulate Firestore logic and provide a clean API for the UI:
-
-* `AccountService` — CRUD, balances, realtime subscriptions
-* `CategoryService` — default categories, search
-* `TransactionService` — transaction CRUD, balance reconciliation
-* `GoalService` — create/track/pay toward goals
-* `UserProfileService` — upload profile images and update user metadata
+* Enforce **Firestore & Storage security rules**
+* Avoid committing **secrets** to source control
+* Enable **email verification** + MFA for users
 
 ---
 
-## ✅ Troubleshooting
+## 🛠️ Troubleshooting
 
-* **Google Sign-In issue**: Check SHA-1 fingerprint and `webClientId` in Firebase console
-* **Storage upload fails**: Check Storage rules and Android permissions
-* **App crashes / metro bundler**: Clear cache `expo start -c` and reinstall the app
-
----
-
-## ✨ Contributing
-
-Contributions are welcome! Please open issues for bugs and feature requests, and use pull requests for fixes. Keep commits small and include clear descriptions.
-
-Suggested workflow:
-
-1. Fork the repo
-2. Create a feature branch
-3. Open a pull request against `main`
+* **Google Sign-In errors** → Check SHA-1 fingerprint + `webClientId`
+* **Storage upload fails** → Verify bucket rules + Android permissions
+* **App crashes on device** → Clear Metro cache, reinstall app
 
 ---
 
-## 📝 License
+## 📜 License
 
-This project is released under the **MIT License**. See `LICENSE` for details.
-
----
-
-## 🙌 Credits
-
-Built with ❤️ using Expo, React Native, Firebase and the React Native community.
+[MIT License](LICENSE) © 2025 Achini Pramodhya
 
 ---
 
-> *Replace demo / apk links and screenshots in this README with actual URLs and images from your project to make it production-ready.*
+## 🙌 Acknowledgements
+
+Built with ❤️ using:
+
+* [Expo](https://expo.dev)
+* [Firebase](https://firebase.google.com/)
+* [React Native Community](https://reactnative.dev)
+
+---
+
+⚡ **CashFlowr** – Track smarter, spend wisely, live free.
+
+---
 
