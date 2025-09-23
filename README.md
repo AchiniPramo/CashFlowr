@@ -1,4 +1,4 @@
-# 💰 CashFlowr - Personal Finance Tracker(React Native + Expo + Firebase)
+# 💰 CashFlowr - Personal Finance Tracker
 
 **Your modern personal finance companion** — built with **Expo + React Native**, powered by **Firebase**, and designed with a clean modular architecture.
 
@@ -20,12 +20,6 @@
 ### 📲 Download APK
 
 [![📱 Download APK](https://img.shields.io/badge/📱_Download_APK-Available_Now-4285F4?style=for-the-badge\&logo=googledrive\&logoColor=white\&labelColor=black)](https://drive.google.com/file/d/1-lkjKk4TDxDcZSItsKzbgJh6d2UTEV56/view?usp=drive_link)
-
-### 🖥️ GitHub Repository
-
-[![🌐 View on GitHub](https://img.shields.io/badge/View_on_GitHub-CashFlowr-181717?style=for-the-badge\&logo=github)](https://github.com/AchiniPramo/CashFlowr.git)
-
-</div>  
 
 ---
 
@@ -96,6 +90,30 @@ utils/          # Helpers & utilities
 firebase.ts     # Firebase initialization
 eas.json        # Build profiles
 ```
+
+---
+
+## 🔑 Firebase Setup
+
+The app integrates tightly with **Firebase**:
+
+1. **Enable Authentication**
+
+   * Email/Password
+   * Google (OAuth client ID + SHA-1 for Android)
+   * Apple Sign-In (iOS, Apple Dev + Firebase setup)
+
+2. **Firestore**
+
+   * Create DB with security rules
+   * Example: user-scoped documents (`users/{uid}/...`)
+
+3. **Storage**
+
+   * Bucket for profile images
+   * Rules to enforce user-only access
+
+👉 Secrets live in `firebase.ts`. For production, use **secure env handling** (EAS Secrets).
 
 ---
 
@@ -191,4 +209,3 @@ Built with ❤️ using:
 ⚡ **CashFlowr** – Track smarter, spend wisely, live free.
 
 ---
-
