@@ -116,6 +116,17 @@ The app integrates tightly with **Firebase**:
 👉 Secrets live in `firebase.ts`. For production, use **secure env handling** (EAS Secrets).
 
 ---
+## 🧩 Services Architecture
+
+Domain-driven services (`/services/`) abstract Firestore logic:
+
+* `AccountService` → CRUD, balances, realtime subscribe
+* `CategoryService` → defaults, search, filters
+* `TransactionService` → CRUD, queries, balance sync
+* `GoalService` → CRUD, payTowardGoal, progress helpers
+* `UserProfileService` → upload images, update Firestore
+
+---
 
 ## 📲 Running Locally
 
