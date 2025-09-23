@@ -1,6 +1,6 @@
 # 💰 CashFlowr - Personal Finance Tracker
 
-**Your modern personal finance companion** — built with **Expo + React Native**, powered by **Firebase**, and designed with a clean modular architecture.
+CashFlowr is a modern, intuitive personal finance management application built with React Native and Expo. Track your income and expenses, visualize your spending patterns, and take control of your financial health.
 
 ---
 
