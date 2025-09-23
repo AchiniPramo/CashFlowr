@@ -229,7 +229,7 @@ Having trouble with CashFlowr?
 ---
 
 <div align="center">
-Made with ❤️ by <a href="https://github.com/AchiniPramo">Achini Pramod</a>
+Made with ❤️ by Achini Pramodhya
 </div>
 
 <p align="center">
