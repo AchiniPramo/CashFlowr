@@ -215,8 +215,24 @@ Built with ❤️ using:
 * [Firebase](https://firebase.google.com/)
 * [React Native Community](https://reactnative.dev)
 
----
-
 ⚡ **CashFlowr** – Track smarter, spend wisely, live free.
 
 ---
+
+## 📞 Support
+
+Having trouble with CashFlowr?
+
+* Open an issue on GitHub
+* Email us at [achinipramodhya4@gmail.com](mailto:achinipramodhya4@gmail.com)
+
+---
+
+<div align="center">
+Made with ❤️ by <a href="https://github.com/AchiniPramo">Achini Pramod</a>
+</div>
+
+<p align="center">
+⭐ Don't forget to star this repository if you find it useful!
+</p>
+
